@@ -60,12 +60,9 @@ def validate(model, device, params, save_plot=False):
             with torch.no_grad():
                 n = x.size(0)
                 h, w = x.size(2), x.size(3)
-                #print("x", x.size()),
                 x = x.view(-1, 1, h, w).to(device)
-                #print("y", y.size())
                 y = y.view(-1, 3, h, w).to(device)
                 t1 = time.time()
-                #print("inference")
                 scores = model(x)
                 t2 = time.time()
                 loss, recall, precision, rmsd = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])

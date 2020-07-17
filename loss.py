@@ -1,20 +1,20 @@
 import torch
 import torch.nn as nn
-import torch.functional as F
 
 
 class PeaknetBCELoss(nn.Module):
 
-    def __init__(self, coor_scale=1, pos_weight=1):
+    def __init__(self, coor_scale=1, pos_weight=None):
         super(PeaknetBCELoss, self).__init__()
         self.coor_scale = coor_scale
         self.mseloss = nn.MSELoss()
         self.bceloss = None
-        self.pos_weight = torch.Tensor([pos_weight])
+        if pos_weight is None:
+            self.pos_weight = None
+        else:
+            self.pos_weight = torch.Tensor([pos_weight])
 
     def forward(self, scores, targets, cutoff=0.1, verbose=False):
-        #print("cutoff", cutoff)
-        #verbose = True
         n = scores.size(0)
         m = scores.size(1)
         h = scores.size(2)
@@ -29,7 +29,10 @@ class PeaknetBCELoss(nn.Module):
         scores_y = nn.Sigmoid()(scores[:, 1, :, :].reshape(-1)[gt_mask])
         targets_x = targets[:, 2, :, :].reshape(-1)[gt_mask]
         targets_y = targets[:, 1, :, :].reshape(-1)[gt_mask]
-        pos_weight = (~gt_mask).sum().double() / gt_mask.sum().double()
+        if self.pos_weight is None:
+            pos_weight = 0.001 * (~gt_mask).sum().double() / gt_mask.sum().double()
+        else:
+            pos_weight = self.pos_weight
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         loss_conf = self.bceloss(scores_c, targets_c)
         loss_x = self.coor_scale * self.mseloss(scores_x, targets_x)
@@ -41,10 +44,9 @@ class PeaknetBCELoss(nn.Module):
             positives = (scores_c > cutoff)
             n_p = positives.sum()
             n_tp = (positives[gt_mask]).sum()
-            recall = float(n_tp) / float(n_gt)
-            precision = float(n_tp) / float(n_p)
+            recall = float(n_tp) / max(1, int(n_gt))
+            precision = float(n_tp) / max(1, int(n_p))
             rmsd = torch.sqrt(torch.mean((targets_x - scores_x).pow(2) + (targets_y - scores_y).pow(2)))
-
             if verbose:
                 print("nGT", int(n_gt), "recall", int(n_tp), "nP", int(n_p), "rmsd", float(rmsd),
                       "loss", float(loss.data), "conf", float(loss_conf.data), "coor", float(loss_coor.data))

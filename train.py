@@ -56,7 +56,7 @@ def parse_args():
     p.add_argument("--gpu", "-g", type=int, default=None, help="Use GPU x")
     p.add_argument("--batch_size", "-b", type=int, default=1, help="Batch size")
     p.add_argument("--n_filters", type=int, default=32, help="Number of filters in UNet's first layer")
-    p.add_argument("--pos_weight", "-p", type=int, default=10, help="Weight for positive data")
+    p.add_argument("--pos_weight", "-p", type=int, default=None, help="Weight for positive data")
     p.add_argument("--n_per_run", "-n", type=int, default=-1, help="Number of images to sample from a run")
     return p.parse_args()
 
