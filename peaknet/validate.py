@@ -1,13 +1,12 @@
 import numpy as np
 import time
-from glob import glob
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from data import PSANADataset, PSANAImage
+from peaknet.data import PSANADataset, PSANAImage
 from unet import UNet
-from loss import PeaknetBCELoss
-from train import check_existence
+from peaknet.loss import PeaknetBCELoss
+from peaknet.train import check_existence
 import matplotlib as mpl
 mpl.use('Agg')
 from matplotlib import pyplot as plt
