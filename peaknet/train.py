@@ -1,11 +1,11 @@
-import numpy as np
+import os
 from glob import glob
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from data import PSANADataset, PSANAImage
+from peaknet.data import PSANADataset, PSANAImage
 from unet import UNet
-from loss import PeaknetBCELoss
+from peaknet.loss import PeaknetBCELoss
 import argparse
 
 
@@ -21,6 +21,10 @@ def train(model, device, params):
     seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     for i, (cxi_path, exp, run) in enumerate(train_dataset):
+        if os.path.isfile("good_cxi/{}_{}".format(exp, run)):
+            pass
+        else:
+            continue
         if check_existence(exp, run):
             pass
         else:
@@ -39,7 +43,7 @@ def train(model, device, params):
             x = x.view(-1, 1, h, w).to(device)
             y = y.view(-1, 3, h, w).to(device)
             scores = model(x)
-            loss, recall, precision, rmsd= loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
+            loss, recall, precision, rmsd = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
             loss.backward()
             optimizer.step()
             with torch.no_grad():
@@ -56,7 +60,7 @@ def parse_args():
     p.add_argument("--gpu", "-g", type=int, default=None, help="Use GPU x")
     p.add_argument("--batch_size", "-b", type=int, default=1, help="Batch size")
     p.add_argument("--n_filters", type=int, default=32, help="Number of filters in UNet's first layer")
-    p.add_argument("--pos_weight", "-p", type=int, default=10, help="Weight for positive data")
+    p.add_argument("--pos_weight", "-p", type=int, default=None, help="Weight for positive data")
     p.add_argument("--n_per_run", "-n", type=int, default=-1, help="Number of images to sample from a run")
     return p.parse_args()
 

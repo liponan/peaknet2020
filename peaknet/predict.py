@@ -1,41 +1,30 @@
 import numpy as np
 import time
-from glob import glob
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from data import PSANADataset, PSANAImage
+from peaknet.data import PSANADataset, PSANAImage
 from unet import UNet
-from loss import PeaknetBCELoss
-from train import check_existence
-import matplotlib as mpl
-mpl.use('Agg')
-from matplotlib import pyplot as plt
+from peaknet.loss import PeaknetBCELoss
+from peaknet.train import check_existence
 import argparse
 
 
-def plot(x, y, scores, output_path, save_npy=True):
-    x = x.data.cpu().numpy()
-    y = y.data.cpu().numpy()
-    scores = nn.Sigmoid()(scores.data).cpu().numpy()
-    for i in range(x.shape[0]):
-        if np.sum(y[i, 0, :, :]) < 1:
-            continue
-        fig = plt.figure()
-        plt.subplot(3, 1, 1)
-        plt.imshow(x[i, 0, :, :])
-        plt.subplot(3, 1, 2)
-        plt.imshow(y[i, 0, :, :], vmin=0, vmax=1)
-        plt.subplot(3, 1, 3)
-        plt.imshow(scores[i, 0, :, :], vmin=0, vmax=1)
-        plt.savefig(output_path+"_x_y_scores{}.png".format(str(i).zfill(3)))
-        plt.close()
-        np.save(output_path + "_x{}.npy".format(str(i).zfill(3)), x[i, 0, :, :])
-        np.save(output_path + "_y{}.npy".format(str(i).zfill(3)), y[i, :, :, :])
-        np.save(output_path + "_scores{}.npy".format(str(i).zfill(3)), scores[i, :, :, :])
+def extract(scores, conf_cutoff=0.1):
+    scores = nn.Sigmoid()(scores)
+    scores_c = scores[:, 0, :, :].reshape(-1)
+    conf_mask = scores_c > conf_cutoff
+    scores_x = scores[:, 2, :, :].reshape(-1)[conf_mask]
+    scores_y = scores[:, 1, :, :].reshape(-1)[conf_mask]
+    uv = torch.nonzeros(conf_mask)
+    predicted_x = scores_x + uv[:, 1].float()
+    predicted_y = scores_y + uv[:, 0].float()
+    output = torch.cat((predicted_x[:, None], predicted_y[:, None], scores_c[conf_mask, None]), dim=1)
+    output = output.cpu().data.numpy()
+    return output
 
 
-def validate(model, device, params, save_plot=False):
+def predict(model, device, params):
     model.eval()
     loss_func = PeaknetBCELoss().to(device)
     val_dataset = PSANADataset(params["run_dataset_path"], subset="val", shuffle=False)
@@ -60,33 +49,15 @@ def validate(model, device, params, save_plot=False):
             with torch.no_grad():
                 n = x.size(0)
                 h, w = x.size(2), x.size(3)
-                #print("x", x.size()),
                 x = x.view(-1, 1, h, w).to(device)
-                #print("y", y.size())
                 y = y.view(-1, 3, h, w).to(device)
                 t1 = time.time()
-                #print("inference")
                 scores = model(x)
                 t2 = time.time()
-                loss, recall, precision, rmsd = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
+                results = extract(scores, conf_cutoff=params["cutoff"])
                 seen += n
                 dt = t2 - t1
-                print("loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f} in {:5.3f} ms".
-                      format(float(loss.data.cpu()), recall, precision, rmsd, 1000*dt))
-                acc_rec += n * recall
-                acc_pre += n * precision
-                acc_rms += n * rmsd
-                acc_dt += n * dt
-                if save_plot:
-                    output_filename = "debug/val_{}_{}_{}".format(exp, run, str(j).zfill(6))
-                    plot(x, y, scores, output_filename)
-        psana_images.close()
-    acc_rec /= seen
-    acc_pre /= seen
-    acc_rms /= seen
-    acc_dt /= seen
-    print("VAL  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}  avg inference time  {:5.3f} ms".
-          format(acc_rec, acc_pre, acc_rms, 1000*dt))
+                # TODO(leeneil) output data to a static file
 
 
 def parse_args():
@@ -113,7 +84,7 @@ def main():
     else:
         device = torch.device("cpu")
     model = model.to(device)
-    validate(model, device, params, save_plot=args.plot)
+    predict(model, device, params)
 
 
 if __name__ == "__main__":
