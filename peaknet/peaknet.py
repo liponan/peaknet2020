@@ -1,4 +1,5 @@
 import torch
+from peaknet.predict import extract
 from unet import UNet
 
 
@@ -21,8 +22,10 @@ class PeakNet(object):
         self.model.load_state_dict(torch.load(model_path, map_location="cpu"))
         self.model_path = model_path
 
-    def predict(self, data):
-        raise NotImplementedError("This method is not implemented yet.")
+    def predict(self, data, conf_cutoff=0.1):
+        scores = self.model(data)
+        output = extract(scores, conf_cutoff=conf_cutoff)
+        return output
 
     def train(self, data):
         raise NotImplementedError("This method is not implemented yet.")
