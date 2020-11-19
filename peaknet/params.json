@@ -1,0 +1,14 @@
+{
+  "run_dataset_path": "/reg/neh/home/liponan/peaknet2020/data/cxic0415.csv",
+  "verbose": false,
+  "lr": 0.01,
+  "weight_decay": 1e-4,
+  "cutoff": 0.2,
+  "pos_weight": null,
+  "batch_size": 2,
+  "num_workers": 0,
+  "downsample": 1,
+  "n_per_run": 5000,
+  "n_filters": 16,
+  "backup_every": 100
+}
