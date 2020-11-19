@@ -3,9 +3,9 @@ from glob import glob
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from peaknet.data import PSANADataset, PSANAImage
+from data import PSANADataset, PSANAImage
 from unet import UNet
-from peaknet.loss import PeaknetBCELoss
+from loss import PeaknetBCELoss
 import argparse
 
 
@@ -20,11 +20,12 @@ def train(model, device, params):
     train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True)
     seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
+    print("train_dataset", len(train_dataset))
     for i, (cxi_path, exp, run) in enumerate(train_dataset):
-        if os.path.isfile("good_cxi/{}_{}".format(exp, run)):
-            pass
-        else:
-            continue
+        #if os.path.isfile("good_cxi/{}_{}".format(exp, run)):
+        #    pass
+        #else:
+        #    continue
         if check_existence(exp, run):
             pass
         else:
@@ -67,7 +68,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    params = {"run_dataset_path": "/reg/neh/home/liponan/peaknet2020/data/train.csv",
+    params = {"run_dataset_path": "/reg/neh/home/liponan/peaknet2020/data/cxic0415.csv",
               "verbose": False, "lr": 0.01, "weight_decay": 1e-4, "cutoff": 0.2, "pos_weight": args.pos_weight,
               "batch_size": args.batch_size, "num_workers": 0, "downsample": 1, "n_per_run": args.n_per_run}
     model = UNet(n_channels=1, n_classes=3, n_filters=args.n_filters)

@@ -11,7 +11,7 @@ except ImportError:
 
 
 def main():
-    setup(name='peaknet2020',
+    setup(name='peaknet',
           version='0.1.0',
           author='Po-Nan Li',
           author_email="liponan@stanford.edu",

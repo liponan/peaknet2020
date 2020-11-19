@@ -1,5 +1,5 @@
 import torch
-from peaknet.predict import extract
+from predict import extract
 from unet import UNet
 
 

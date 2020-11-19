@@ -132,10 +132,12 @@ class CXILabel(Dataset):
         self.eventIdx = self.f["LCLS/eventNumber"][:self.n_hits]
         self.peak_x_label = self.f['entry_1/result_1/peakXPosRaw'][:self.n_hits, :]
         self.peak_y_label = self.f['entry_1/result_1/peakYPosRaw'][:self.n_hits, :]
+        #self.peak_x_center = self.f['entry_1/result_1/peakXPosRaw'][:self.n_hits, :]
+        #self.peak_y_center = self.f['entry_1/result_1/peakYPosRaw'][:self.n_hits, :]
         self.peak_x_center = self.f['entry_1/result_1/peak2'][:self.n_hits, :]
         self.peak_y_center = self.f['entry_1/result_1/peak1'][:self.n_hits, :]
-        self.peak_w = self.f['entry_1/result_1/peak4'][:self.n_hits, :]
-        self.peak_h = self.f['entry_1/result_1/peak3'][:self.n_hits, :]
+        #self.peak_w = self.f['entry_1/result_1/peak4'][:self.n_hits, :]
+        #self.peak_h = self.f['entry_1/result_1/peak3'][:self.n_hits, :]
         self.detector = str(self.f["entry_1/instrument_1/detector_1/description"].value)
         
     def __len__(self):

@@ -30,7 +30,7 @@ class PeaknetBCELoss(nn.Module):
         targets_x = targets[:, 2, :, :].reshape(-1)[gt_mask]
         targets_y = targets[:, 1, :, :].reshape(-1)[gt_mask]
         if self.pos_weight is None:
-            pos_weight = 0.001 * (~gt_mask).sum().double() / gt_mask.sum().double()
+            pos_weight = 1.0 * (~gt_mask).sum().double() / gt_mask.sum().double()
         else:
             pos_weight = self.pos_weight
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)

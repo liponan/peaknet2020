@@ -3,10 +3,10 @@ import time
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from peaknet.data import PSANADataset, PSANAImage
+from data import PSANADataset, PSANAImage
 from unet import UNet
-from peaknet.loss import PeaknetBCELoss
-from peaknet.train import check_existence
+from loss import PeaknetBCELoss
+from train import check_existence
 import argparse
 
 
