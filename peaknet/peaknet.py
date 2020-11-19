@@ -5,11 +5,13 @@ from unet import UNet
 
 class PeakNet(object):
 
-    def __init__(self, n_filters=32):
+    def __init__(self, n_filters=32, model_path=None):
         self.model = UNet(n_channels=1, n_classes=3, n_filters=n_filters)
-        self.model_path = None
+        self.model_path = model_path
         self.n_filters = n_filters
         self.seen = 0
+        if self.model_path is not None:
+            self.load(self.model_path)
 
     def __repr__(self):
         msg = ("PeakNet\n# filters: {}\nPretrained model: {}".format(self.n_filters, self.model_path))
