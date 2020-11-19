@@ -36,12 +36,14 @@ net = PeakNet()
 To use a pretrained model for prediction:
 
 ```
+import torch
+import numpy as np
 from peaknet import PeakNet
 
-imgs = np.random.rand(1, 185, 388)
-net = PeakNet(model_path=/cds/home/l/liponan/peaknet2020_old/debug/model.pt)
+imgs = torch.from_numpy(np.random.rand(1, 1, 185, 388)).to("cuda:0")
+net = PeakNet(model_path="/cds/home/l/liponan/peaknet2020_old/debug/model.pt")
 net.to("cuda:0")
-output = net.predict(imgs, conf_cutoff=0.1)
+output = net.predict(imgs.float(), conf_cutoff=0.1)
 ```
 
 To train a model from scratch
