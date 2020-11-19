@@ -12,14 +12,14 @@ import argparse
 
 def extract(scores, conf_cutoff=0.1):
     scores = nn.Sigmoid()(scores)
-    scores_c = scores[:, 0, :, :].reshape(-1)
+    scores_c = scores[:, 0, :, :]
     conf_mask = scores_c > conf_cutoff
-    scores_x = scores[:, 2, :, :].reshape(-1)[conf_mask]
-    scores_y = scores[:, 1, :, :].reshape(-1)[conf_mask]
-    uv = torch.nonzeros(conf_mask)
+    scores_x = scores[:, 2, :, :][conf_mask].view(-1)
+    scores_y = scores[:, 1, :, :][conf_mask].view(-1)
+    uv = torch.nonzero(conf_mask)
     predicted_x = scores_x + uv[:, 1].float()
     predicted_y = scores_y + uv[:, 0].float()
-    output = torch.cat((predicted_x[:, None], predicted_y[:, None], scores_c[conf_mask, None]), dim=1)
+    output = torch.cat((predicted_x[:, None], predicted_y[:, None], scores_c[conf_mask].unsqueeze(-1)), dim=1)
     output = output.cpu().data.numpy()
     return output
 
