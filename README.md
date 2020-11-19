@@ -1,17 +1,10 @@
-# peaknet2020
-Peak finding for LCLS crystallography 
-Author: Po-Nan Li @ Stanford & SLAC
-
-
-## Credits
-
-PyTorch model of UNet is due to https://github.com/milesial/Pytorch-UNet
-=======
 # PeakNet 2020
 
 Lighter, faster, better -- Peak finding for LCLS crystallography
 
 Author: Po-Nan Li @ Stanford & SLAC
+
+=======
 
 ## Usage
 
