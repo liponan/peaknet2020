@@ -1,5 +1,6 @@
 import os
 from glob import glob
+import json
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
@@ -51,27 +52,25 @@ def train(model, device, params):
                 seen += n
                 print("seen {:6d}  loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}".
                       format(seen, float(loss.data.cpu()), recall, precision, rmsd))
-                if seen % (100*params["batch_size"]) == 0:
+                if seen % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/model.pt")
         psana_images.close()
 
 
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("params", type=str, default=None, help="A json file")
     p.add_argument("--gpu", "-g", type=int, default=None, help="Use GPU x")
-    p.add_argument("--batch_size", "-b", type=int, default=1, help="Batch size")
-    p.add_argument("--n_filters", type=int, default=32, help="Number of filters in UNet's first layer")
-    p.add_argument("--pos_weight", "-p", type=int, default=None, help="Weight for positive data")
-    p.add_argument("--n_per_run", "-n", type=int, default=-1, help="Number of images to sample from a run")
+    p.add_argument("--model", "-m", type=str, default=None, help="A .PT file")
     return p.parse_args()
 
 
 def main():
     args = parse_args()
-    params = {"run_dataset_path": "/reg/neh/home/liponan/peaknet2020/data/cxic0415.csv",
-              "verbose": False, "lr": 0.01, "weight_decay": 1e-4, "cutoff": 0.2, "pos_weight": args.pos_weight,
-              "batch_size": args.batch_size, "num_workers": 0, "downsample": 1, "n_per_run": args.n_per_run}
-    model = UNet(n_channels=1, n_classes=3, n_filters=args.n_filters)
+    params = json.load(open(args.params))
+    model = UNet(n_channels=1, n_classes=3, n_filters=params["n_filters"])
+    if args.model:
+        model.load_state_dict(torch.load(args.model, map_location="cpu"))
     if args.gpu is not None and torch.cuda.is_available():
         device = torch.device("cuda:{}".format(args.gpu))
     else:
