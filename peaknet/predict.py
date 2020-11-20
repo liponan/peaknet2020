@@ -17,9 +17,10 @@ def extract(scores, conf_cutoff=0.1):
     scores_x = scores[:, 2, :, :][conf_mask].view(-1)
     scores_y = scores[:, 1, :, :][conf_mask].view(-1)
     uv = torch.nonzero(conf_mask)
+    img_idx = uv[:, 0].float()
     predicted_x = scores_x + uv[:, 2].float()
     predicted_y = scores_y + uv[:, 1].float()
-    output = torch.cat((predicted_x[:, None], predicted_y[:, None], scores_c[conf_mask].unsqueeze(-1)), dim=1)
+    output = torch.cat((img_idx[:, None], predicted_x[:, None], predicted_y[:, None], scores_c[conf_mask].unsqueeze(-1)), dim=1)
     output = output.cpu().data.numpy()
     return output
 
