@@ -7,15 +7,10 @@ Author: Po-Nan Li @ Stanford & SLAC
 
 ## Setup
 
-Switch to `ana-1.4.22`
-
-```
-conda activate ana-1.4.22
-```
-
 Install package locally
 
 ```
+export LD_LIBRARY_PATH=$CONDA_PREFIX/lib/:$LD_LIBRARY_PATH
 cd peaknet2020
 mkdir -p install/lib/python2.7/site-packages
 export PYTHONPATH=`pwd`/install/lib/python2.7/site-packages
