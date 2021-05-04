@@ -30,6 +30,7 @@ class PeakNet(object):
         return output
 
     def train(self, data):
+        print("test")
         raise NotImplementedError("This method is not implemented yet.")
 
     def validate(self, data):
