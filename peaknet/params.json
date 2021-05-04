@@ -1,5 +1,5 @@
 {
-  "run_dataset_path": "/cds/home/a/axlevy/peaknet2020/data/cxic0415.csv",
+  "run_dataset_path": "/cds/home/a/axlevy/peaknet2020/data/cxic0415_new.csv",
   "verbose": false,
   "lr": 0.01,
   "weight_decay": 1e-4,
