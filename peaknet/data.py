@@ -82,7 +82,7 @@ class PSANAImage(Dataset):
         img = self.psana.load_img(event)
         if self.normalize:
             img[img < 0] = 0
-            img = img / max(0.01, np.std(img))
+            img = img / max(0.01, np.std(img)) # why max 0.01?
             img = img - np.mean(img)
             # img = img / max(np.max(img), self.max_cutoff)
         h_ds = int(np.ceil(img.shape[1] / float(self.downsample)))
@@ -151,7 +151,7 @@ class CXILabel(Dataset):
             + 8 * np.floor_divide(self.peak_x_label[idx, 0:my_npeaks], 388)
         my_r = np.fmod(self.peak_y_center[idx, 0:my_npeaks], 185.0)
         my_c = np.fmod(self.peak_x_center[idx, 0:my_npeaks], 388.0)
-        return my_event_idx, my_s, my_r, my_c
+        return my_event_idx, my_s, my_r, my_c # what is this?
         # psocake style
 #         my_r = self.peak_y_center[idx,0:my_npeaks]
 #         my_c = self.peak_x_center[idx,0:my_npeaks]
