@@ -77,9 +77,9 @@ class PSANAImage(Dataset):
         self.psana.ds = None
 
     def __getitem__(self, idx):
-        event, s, r, c = self.cxi[self.rand_idxs[idx]]
+        event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
         #         print(event, "s", s, "r", r, "c", c)
-        img = self.psana.load_img(event)
+        img = self.psana.load_img(event_idx)
         if self.normalize:
             img[img < 0] = 0
             img = img / max(0.01, np.std(img)) # why max 0.01?

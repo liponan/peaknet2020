@@ -10,5 +10,6 @@
   "downsample": 1,
   "n_per_run": 50000,
   "n_filters": 24,
-  "backup_every": 100
+  "backup_every": 100,
+  "coor_scale": 0.1
 }

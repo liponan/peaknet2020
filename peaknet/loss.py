@@ -15,10 +15,6 @@ class PeaknetBCELoss(nn.Module):
             self.pos_weight = torch.Tensor([pos_weight])
 
     def forward(self, scores, targets, cutoff=0.1, verbose=False):
-        n = scores.size(0)
-        m = scores.size(1)
-        h = scores.size(2)
-        w = scores.size(3)
         if verbose:
             print("scores", scores.size())
             print("targets", targets.size())
@@ -30,15 +26,17 @@ class PeaknetBCELoss(nn.Module):
         targets_x = targets[:, 2, :, :].reshape(-1)[gt_mask]
         targets_y = targets[:, 1, :, :].reshape(-1)[gt_mask]
         if self.pos_weight is None:
-            pos_weight = 1.0 * (~gt_mask).sum().double() / gt_mask.sum().double()
+            pos_weight = 1.0 * (~gt_mask).sum().double() / gt_mask.sum().double() # p_c = negative_GT / positive_GT
         else:
             pos_weight = self.pos_weight
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         loss_conf = self.bceloss(scores_c, targets_c)
-        loss_x = self.coor_scale * self.mseloss(scores_x, targets_x)
-        loss_y = self.coor_scale * self.mseloss(scores_y, targets_y)
+        # loss_x = self.coor_scale * self.mseloss(scores_x, targets_x)
+        # loss_y = self.coor_scale * self.mseloss(scores_y, targets_y)
+        loss_x = self.mseloss(scores_x, targets_x)
+        loss_y = self.mseloss(scores_y, targets_y)
         loss_coor = loss_x + loss_y
-        loss = loss_conf + self.coor_scale * loss_coor
+        loss = loss_conf + self.coor_scale * loss_coor # why re-multiply by coor_scale?
         with torch.no_grad():
             n_gt = targets_c.sum()
             positives = (scores_c > cutoff)

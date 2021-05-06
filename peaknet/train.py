@@ -17,7 +17,7 @@ def check_existence(exp, run):
 
 def train(model, device, params):
     model.train()
-    loss_func = PeaknetBCELoss(pos_weight=params["pos_weight"]).to(device)
+    loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"]).to(device)
     train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True)
     seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
@@ -42,7 +42,7 @@ def train(model, device, params):
             optimizer.zero_grad()
             n = x.size(0)
             h, w = x.size(2), x.size(3)
-            x = x.view(-1, 1, h, w).to(device)
+            x = x.view(-1, 1, h, w).to(device) # each panel is treated independently !!0
             y = y.view(-1, 3, h, w).to(device)
             scores = model(x)
             loss, recall, precision, rmsd = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
