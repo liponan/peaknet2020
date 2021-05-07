@@ -10,7 +10,6 @@ from unet import UNet
 from loss import PeaknetBCELoss
 import visualize
 import shutil
-import utils
 import argparse
 
 
@@ -99,7 +98,9 @@ def main():
     os.makedirs(model_dir)
 
     summaries_dir = os.path.join(model_dir, 'summaries')
-    utils.cond_mkdir(summaries_dir)
+    if os.path.exists(summaries_dir):
+        shutil.rmtree(summaries_dir)
+    os.makedirs(summaries_dir)
 
     writer = SummaryWriter(summaries_dir)
 
