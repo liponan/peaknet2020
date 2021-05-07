@@ -12,4 +12,4 @@ def show_GT_image(writer, img_vis, target_vis, total_steps, n=5):
         # writer.add_image(panel_name, img_vis[i][None, :, :], global_step=total_steps)
         fig = plt.figure()
         plt.imshow(img_vis[i])
-        writer.add_image(panel_name, fig, global_step=total_steps)
+        writer.add_figure(panel_name, fig, global_step=total_steps)
