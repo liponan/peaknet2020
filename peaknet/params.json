@@ -13,5 +13,5 @@
   "n_filters": 24,
   "backup_every": 100,
   "coor_scale": 0.1,
-  "show_image_every": 100
+  "show_image_every": 25
 }
