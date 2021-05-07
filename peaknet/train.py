@@ -63,6 +63,7 @@ def train(model, device, params, writer):
 
             visualize.scalar_metrics(writer, metrics, total_steps)
             total_steps += 1
+            print("total_steps", total_steps)
 
             loss.backward()
             optimizer.step()
