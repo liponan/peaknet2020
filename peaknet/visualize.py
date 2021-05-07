@@ -32,7 +32,7 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
 
         # Prediction
         h = img_vis.shape[1]
-        w = img_vis.size[2]
+        w = img_vis.shape[2]
         x = img_vis.view(-1, 1, h, w).to(device)  # each panel is treated independently !!0
         scores = model(x)
         indices_nonzero = np.array(np.argwhere(scores[i, 0] > params["cutoff"]))
