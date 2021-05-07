@@ -83,7 +83,8 @@ def main():
     model_dir = os.path.join('debug', params["experiment_name"])
 
     if os.path.exists(model_dir):
-        val = str(input("The model directory %s exists. Overwrite? (y/n)" % model_dir))
+        y = 'y'
+        val = input("The model directory %s exists. Overwrite? (y/n)" % model_dir)
         if val == 'y':
             shutil.rmtree(model_dir)
 
