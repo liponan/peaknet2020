@@ -31,9 +31,9 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
             print("Unrecognized number of classes for visualization.")
 
         # Prediction
-        w = img_vis.size(2)
-        h = img_vis.size(3)
-        x = img_vis.view(-1, 1, w, h).to(device)  # each panel is treated independently !!0
+        h = img_vis.shape[1]
+        w = img_vis.size[2]
+        x = img_vis.view(-1, 1, h, w).to(device)  # each panel is treated independently !!0
         scores = model(x)
         indices_nonzero = np.array(np.argwhere(scores[i, 0] > params["cutoff"]))
         if params["n_classes"] == 3:
