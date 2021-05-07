@@ -10,6 +10,7 @@ from unet import UNet
 from loss import PeaknetBCELoss
 import visualize
 import shutil
+import utils
 import argparse
 
 
@@ -18,13 +19,15 @@ def check_existence(exp, run):
     return len(files) > 0
 
 
-def train(model, device, params):
+def train(model, device, params, writer):
     model.train()
     loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"]).to(device)
     train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True)
     seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     print("train_dataset", len(train_dataset))
+
+    total_steps = 0
     for i, (cxi_path, exp, run) in enumerate(train_dataset):
         #if os.path.isfile("good_cxi/{}_{}".format(exp, run)):
         #    pass
@@ -48,13 +51,18 @@ def train(model, device, params):
             x = x.view(-1, 1, h, w).to(device) # each panel is treated independently !!0
             y = y.view(-1, 3, h, w).to(device)
             scores = model(x)
-            loss, recall, precision, rmsd = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
+            metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
+            loss = metrics["loss"]
+
+            visualize.scalar_metrics(writer, metrics, total_steps)
+            total_steps += 1
+
             loss.backward()
             optimizer.step()
             with torch.no_grad():
                 seen += n
                 print("seen {:6d}  loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}".
-                      format(seen, float(loss.data.cpu()), recall, precision, rmsd))
+                      format(seen, float(loss.data.cpu()), metrics["recall"], metrics["precision"], metrics["rmsd"]))
                 if seen % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
         psana_images.close()
@@ -90,7 +98,12 @@ def main():
 
     os.makedirs(model_dir)
 
-    train(model, device, params)
+    summaries_dir = os.path.join(model_dir, 'summaries')
+    utils.cond_mkdir(summaries_dir)
+
+    writer = SummaryWriter(summaries_dir)
+
+    train(model, device, params, writer)
     
     
 if __name__ == "__main__":

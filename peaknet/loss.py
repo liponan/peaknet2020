@@ -48,7 +48,9 @@ class PeaknetBCELoss(nn.Module):
             if verbose:
                 print("nGT", int(n_gt), "recall", int(n_tp), "nP", int(n_p), "rmsd", float(rmsd),
                       "loss", float(loss.data), "conf", float(loss_conf.data), "coor", float(loss_coor.data))
-        return loss, recall, precision, rmsd
+        metrics = {"loss": loss, "loss_conf": loss_conf, "loss_coor": loss_coor, "recall": recall,
+                   "precision": precision, "rmsd": rmsd}
+        return metrics
 
 
 class PeaknetMSELoss(nn.Module):
