@@ -11,9 +11,11 @@ def show_GT_image(writer, img_vis, target_vis, total_steps, n=5):
         panel_name = 'panel_'+str(i)
         # writer.add_image(panel_name, img_vis[i][None, :, :], global_step=total_steps)
         fig = plt.figure()
-        plt.subplot(211)
         plt.imshow(img_vis[i])
-        plt.xlabel([])
-        plt.subplot(212)
-        plt.imshow(target_vis[i, 0], cmap='gray')
+        plt.xticks([])
+        plt.yticks([])
+        indices_nonzero = np.array(np.nonzero(target_vis[i, 0]))
+        plt.plot(indices_nonzero[0, :] - .5 + target_vis[i, 1],
+                 indices_nonzero[1, :] - .5 + target_vis[i, 2],
+                 'rs', markerfacecolor='none', markersize=15, markeredgewidth=2.0) # not sure of orientation here...
         writer.add_figure(panel_name, fig, global_step=total_steps)
