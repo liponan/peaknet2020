@@ -10,8 +10,9 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
     for i in range(n):
         panel_name = 'panel_'+str(i)
 
-        fig = plt.figure()
-        plt.imshow(img_vis[i], cmap='cool')
+        fig = plt.figure(figsize=(10,10))
+        plt.subplot(211)
+        plt.imshow(img_vis[i], cmap='Blues')
         plt.xticks([])
         plt.yticks([])
 
@@ -50,5 +51,9 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         else:
             print("Unrecognized number of classes for visualization.")
 
+        plt.subplot(212)
+        plt.imshow(img_vis[i], cmap='Blues')
+        plt.xticks([])
+        plt.yticks([])
 
         writer.add_figure(panel_name, fig, global_step=total_steps)
