@@ -52,6 +52,42 @@ class PeaknetBCELoss(nn.Module):
                    "precision": precision, "rmsd": rmsd}
         return metrics
 
+class PeakNetBCE1ChannelLoss(nn.Module):
+
+    def __init__(self, coor_scale=1, pos_weight=None, kernel_MaxPool=3):
+        super(PeaknetBCELoss, self).__init__()
+        self.coor_scale = coor_scale
+        self.bceloss = None
+        padding = (kernel_MaxPool - 1)//2
+        self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=kernel_MaxPool, padding=padding)
+        if pos_weight is None:
+            self.pos_weight = None
+        else:
+            self.pos_weight = torch.Tensor([pos_weight])
+
+    def forward(self, scores, targets, cutoff=0.5, verbose=False):
+        scores_c = self.maxpool(scores)[:, 0, :, :].reshape(-1)
+        targets_c = self.maxpool(targets)[:, 0, :, :].reshape(-1)
+        gt_mask = targets_c > 0
+
+        if self.pos_weight is None:
+            pos_weight = 1.0 * (~gt_mask).sum().double() / gt_mask.sum().double() # p_c = negative_GT / positive_GT
+        else:
+            pos_weight = self.pos_weight
+        self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        loss = self.bceloss(scores_c, targets_c)
+
+        with torch.no_grad():
+            n_gt = targets_c.sum()
+            positives = (scores_c > cutoff)
+            n_p = positives.sum()
+            n_tp = (positives[gt_mask]).sum()
+            recall = float(n_tp) / max(1, int(n_gt))
+            precision = float(n_tp) / max(1, int(n_p))
+            if verbose:
+                print("nGT", int(n_gt), "recall", int(n_tp), "nP", int(n_p), "loss", float(loss.data))
+        metrics = {"loss": loss, "recall": recall, "precision": precision}
+        return metrics
 
 class PeaknetMSELoss(nn.Module):
     

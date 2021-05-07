@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from data import PSANADataset, PSANAImage
 from unet import UNet
-from loss import PeaknetBCELoss
+from loss import PeaknetBCELoss, PeakNetBCE1ChannelLoss
 import visualize
 import shutil
 import argparse
@@ -24,7 +24,13 @@ def check_existence(exp, run):
 
 def train(model, device, params, writer):
     model.train()
-    loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"]).to(device)
+    if params["n_classes"] == 3:
+        loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"]).to(device)
+    elif params["n_classes"] == 1:
+        loss_func = PeakNetBCE1ChannelLoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"]).to(device)
+    else:
+        print("Unrecognized number of classes for loss function.")
+        return
     train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True)
     seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
@@ -78,7 +84,7 @@ def train(model, device, params, writer):
                 if seen % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                 if total_steps % params["show_image_every"] == 0:
-                    visualize.show_GT_image(writer, img_vis, target_vis, total_steps)
+                    visualize.show_GT_image(writer, img_vis, target_vis, total_steps, params)
         psana_images.close()
 
 
@@ -93,7 +99,7 @@ def parse_args():
 def main():
     args = parse_args()
     params = json.load(open(args.params))
-    model = UNet(n_channels=1, n_classes=3, n_filters=params["n_filters"])
+    model = UNet(n_channels=1, n_classes=params["n_classes"], n_filters=params["n_filters"])
     if args.model:
         model.load_state_dict(torch.load(args.model, map_location="cpu"))
     if args.gpu is not None and torch.cuda.is_available():
