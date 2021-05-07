@@ -1,4 +1,8 @@
 import os
+import matplotlib as mpl
+if os.environ.get('DISPLAY','') == '':
+    print('no display found. Using non-interactive Agg backend')
+    mpl.use('Agg')
 from glob import glob
 import json
 import torch
@@ -11,10 +15,6 @@ from loss import PeaknetBCELoss
 import visualize
 import shutil
 import argparse
-import matplotlib as mpl
-if os.environ.get('DISPLAY','') == '':
-    print('no display found. Using non-interactive Agg backend')
-    mpl.use('Agg')
 
 
 def check_existence(exp, run):
