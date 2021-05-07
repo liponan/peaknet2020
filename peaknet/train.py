@@ -79,8 +79,11 @@ def train(model, device, params, writer):
             optimizer.step()
             with torch.no_grad():
                 seen += n
-                print("seen {:6d}  loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}".
-                      format(seen, float(loss.data.cpu()), metrics["recall"], metrics["precision"], metrics["rmsd"]))
+                # print("seen {:6d}  loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}".
+                #       format(seen, float(loss.data.cpu()), metrics["recall"], metrics["precision"], metrics["rmsd"]))
+                print_str = "seen "+str(seen)
+                for (key, value) in metrics.items():
+                    print_str += key + " " + str(value)
                 if seen % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                 if total_steps % params["show_image_every"] == 0:
