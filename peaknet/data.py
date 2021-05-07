@@ -61,7 +61,7 @@ class PSANAImage(Dataset):
                 u = int(np.floor(my_r[j] / float(self.downsample)))
                 v = int(np.floor(my_c[j] / float(self.downsample)))
                 label[i, 0, u, v] = 1
-                label[i, 1, u, v] = np.fmod(my_r[j] / float(self.downsample), 1.0)
+                label[i, 1, u, v] = np.fmod(my_r[j] / float(self.downsample), 1.0) #
                 label[i, 2, u, v] = np.fmod(my_c[j] / float(self.downsample), 1.0)
         return label
 
@@ -77,9 +77,9 @@ class PSANAImage(Dataset):
         self.psana.ds = None
 
     def __getitem__(self, idx):
-        event, s, r, c = self.cxi[self.rand_idxs[idx]]
+        event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
         #         print(event, "s", s, "r", r, "c", c)
-        img = self.psana.load_img(event)
+        img = self.psana.load_img(event_idx)
         if self.normalize:
             img[img < 0] = 0
             img = img / max(0.01, np.std(img)) # why max 0.01?
