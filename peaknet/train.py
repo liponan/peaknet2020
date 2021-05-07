@@ -63,7 +63,7 @@ def train(model, device, params, writer):
 
             visualize.scalar_metrics(writer, metrics, total_steps)
             total_steps += 1
-            print("total_steps", total_steps)
+            # print("total_steps", total_steps)
 
             loss.backward()
             optimizer.step()
@@ -105,6 +105,7 @@ def main():
         val = input("The model directory %s exists. Overwrite? (y/n)" % model_dir)
         if val == 'y':
             shutil.rmtree(model_dir)
+            print("Directory removed.")
 
     os.makedirs(model_dir)
 
