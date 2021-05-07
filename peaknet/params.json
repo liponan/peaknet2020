@@ -12,5 +12,6 @@
   "n_per_run": 50000,
   "n_filters": 24,
   "backup_every": 100,
-  "coor_scale": 0.1
+  "coor_scale": 0.1,
+  "show_image_every": 100
 }

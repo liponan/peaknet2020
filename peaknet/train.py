@@ -26,6 +26,14 @@ def train(model, device, params, writer):
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     print("train_dataset", len(train_dataset))
 
+    # Preloading for visualization
+    idx_experiment_visualization = 0
+    cxi_path_vis, exp_vis, run_vis = train_dataset[idx_experiment_visualization]
+    psana_images_vis = PSANAImage(cxi_path_vis, exp_vis, run_vis, downsample=params["downsample"], n=params["n_per_run"])
+
+    idx_event_visualization = len(psana_images_vis) // 2
+    img_vis, target_vis = psana_images_vis[idx_event_visualization]
+
     total_steps = 0
     for i, (cxi_path, exp, run) in enumerate(train_dataset):
         #if os.path.isfile("good_cxi/{}_{}".format(exp, run)):
@@ -64,6 +72,8 @@ def train(model, device, params, writer):
                       format(seen, float(loss.data.cpu()), metrics["recall"], metrics["precision"], metrics["rmsd"]))
                 if seen % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
+                if total_steps % params["show_image_every"] == 0:
+                    visualize.show_GT_image(writer, img_vis, target_vis, total_steps)
         psana_images.close()
 
 
