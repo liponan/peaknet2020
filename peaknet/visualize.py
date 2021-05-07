@@ -1,6 +1,5 @@
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
+import os
 import matplotlib.pyplot as plt
 
 def scalar_metrics(writer, metrics, total_steps):
