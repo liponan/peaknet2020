@@ -15,8 +15,10 @@ def show_GT_image(writer, img_vis, target_vis, total_steps, n=5):
         plt.xticks([])
         plt.yticks([])
         indices_nonzero = np.array(np.nonzero(target_vis[i, 0]))
-        shift_u = target_vis[i, 1].numpy()[indices_nonzero]
-        shift_v = target_vis[i, 2].numpy()[indices_nonzero]
+        shift_u = target_vis[i, 1, indices_nonzero[:, 0], indices_nonzero[:, 1]].numpy()
+        shift_v = target_vis[i, 2, indices_nonzero[:, 0], indices_nonzero[:, 1]].numpy()
+        print(indices_nonzero.shape)
+        print(shift_u.shape)
         plt.plot(indices_nonzero[:, 0] - .5 + shift_u,
                  indices_nonzero[:, 1] - .5 + shift_v,
                  'rs', markerfacecolor='none', markersize=15, markeredgewidth=2.0) # not sure of orientation here...
