@@ -16,7 +16,7 @@ def show_GT_image(writer, img_vis, target_vis, total_steps, n=5):
         plt.yticks([])
         indices_nonzero = np.array(np.nonzero(target_vis[i, 0]))
         print(indices_nonzero.shape)
-        plt.plot(indices_nonzero[0, :] - .5 + target_vis[i, 1],
-                 indices_nonzero[1, :] - .5 + target_vis[i, 2],
+        plt.plot(indices_nonzero[:, 0] - .5 + target_vis[i, 1].numpy(),
+                 indices_nonzero[:, 1] - .5 + target_vis[i, 2].numpy(),
                  'rs', markerfacecolor='none', markersize=15, markeredgewidth=2.0) # not sure of orientation here...
         writer.add_figure(panel_name, fig, global_step=total_steps)
