@@ -84,6 +84,7 @@ def train(model, device, params, writer):
                 print_str = "seen "+str(seen)
                 for (key, value) in metrics.items():
                     print_str += key + " " + str(value)
+                print(print_str)
                 if seen % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                 if total_steps % params["show_image_every"] == 0:
