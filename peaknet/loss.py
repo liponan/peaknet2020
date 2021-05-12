@@ -70,7 +70,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         targets_c = targets[:, 0, :, :].reshape(-1)
         gt_mask = targets_c > 0
 
-        pos_weight = self.pos_weight * (~gt_mask).sum().double() / gt_mask.sum().double()
+        pos_weight = 1.0 * (~gt_mask).sum().double() / gt_mask.sum().double()
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         loss = self.bceloss(scores_c, targets_c)
 
