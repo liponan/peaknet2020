@@ -6,7 +6,7 @@ import os
 n_experiments = 1
 pos_weight_list = np.logspace(-2, 0, 5)
 
-os.system('cd ../peaknet')
+os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
 for i, pw in enumerate(pos_weight_list):
     print("Experiment #"+str(i + 1))
