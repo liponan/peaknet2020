@@ -4,12 +4,14 @@ import torch.nn as nn
 
 class PeaknetBCELoss(nn.Module):
 
-    def __init__(self, coor_scale=1, pos_weight=1.0):
+    def __init__(self, coor_scale=1, pos_weight=1.0, device=None):
         super(PeaknetBCELoss, self).__init__()
         self.coor_scale = coor_scale
         self.mseloss = nn.MSELoss()
         self.bceloss = None
         self.pos_weight = torch.Tensor([pos_weight])
+        if device is not None:
+            self.pos_weight.to(device)
 
     def forward(self, scores, targets, cutoff=0.1, verbose=False):
         if verbose:
@@ -50,13 +52,15 @@ class PeaknetBCELoss(nn.Module):
 
 class PeakNetBCE1ChannelLoss(nn.Module):
 
-    def __init__(self, coor_scale=1, pos_weight=1.0, kernel_MaxPool=3):
+    def __init__(self, coor_scale=1, pos_weight=1.0, kernel_MaxPool=3, device=None):
         super(PeakNetBCE1ChannelLoss, self).__init__()
         self.coor_scale = coor_scale
         self.bceloss = None
         padding = (kernel_MaxPool - 1)//2
         self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=kernel_MaxPool, padding=padding)
         self.pos_weight = torch.Tensor([pos_weight])
+        if device is not None:
+            self.pos_weight.to(device)
 
     def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
         if maxpool:
