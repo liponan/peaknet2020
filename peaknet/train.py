@@ -97,7 +97,7 @@ def train(model, device, params, writer):
 
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("params", type=str, default=None, help="A json file")
+    p.add_argument("--params", type=str, default=None, help="A json file")
 
     # System parameters
     p.add_argument("--gpu", "-g", type=int, default=None, help="Use GPU x")
