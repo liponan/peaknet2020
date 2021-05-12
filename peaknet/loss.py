@@ -4,15 +4,12 @@ import torch.nn as nn
 
 class PeaknetBCELoss(nn.Module):
 
-    def __init__(self, coor_scale=1, pos_weight=None):
+    def __init__(self, coor_scale=1, pos_weight=1.0):
         super(PeaknetBCELoss, self).__init__()
         self.coor_scale = coor_scale
         self.mseloss = nn.MSELoss()
         self.bceloss = None
-        if pos_weight is None:
-            self.pos_weight = None
-        else:
-            self.pos_weight = torch.Tensor([pos_weight])
+        self.pos_weight = torch.Tensor([pos_weight])
 
     def forward(self, scores, targets, cutoff=0.1, verbose=False):
         if verbose:
@@ -25,10 +22,9 @@ class PeaknetBCELoss(nn.Module):
         scores_y = nn.Sigmoid()(scores[:, 1, :, :].reshape(-1)[gt_mask])
         targets_x = targets[:, 2, :, :].reshape(-1)[gt_mask]
         targets_y = targets[:, 1, :, :].reshape(-1)[gt_mask]
-        if self.pos_weight is None:
-            pos_weight = 1.0 * (~gt_mask).sum().double() / gt_mask.sum().double() # p_c = negative_GT / positive_GT
-        else:
-            pos_weight = self.pos_weight
+
+        pos_weight = self.pos_weight * (~gt_mask).sum().double() / gt_mask.sum().double() # p_c = negative_GT / positive_GT
+
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         loss_conf = self.bceloss(scores_c, targets_c)
         # loss_x = self.coor_scale * self.mseloss(scores_x, targets_x)
@@ -54,26 +50,23 @@ class PeaknetBCELoss(nn.Module):
 
 class PeakNetBCE1ChannelLoss(nn.Module):
 
-    def __init__(self, coor_scale=1, pos_weight=None, kernel_MaxPool=3):
+    def __init__(self, coor_scale=1, pos_weight=1.0, kernel_MaxPool=3):
         super(PeakNetBCE1ChannelLoss, self).__init__()
         self.coor_scale = coor_scale
         self.bceloss = None
         padding = (kernel_MaxPool - 1)//2
         self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=kernel_MaxPool, padding=padding)
-        if pos_weight is None:
-            self.pos_weight = None
-        else:
-            self.pos_weight = torch.Tensor([pos_weight])
+        self.pos_weight = torch.Tensor([pos_weight])
 
-    def forward(self, scores, targets, cutoff=0.5, verbose=False):
-        scores_c = self.maxpool(scores)[:, 0, :, :].reshape(-1)
-        targets_c = self.maxpool(targets)[:, 0, :, :].reshape(-1)
+    def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
+        if maxpool:
+            scores = self.maxpool(scores)
+            targets = self.maxpool(targets)
+        scores_c = scores[:, 0, :, :].reshape(-1)
+        targets_c = targets[:, 0, :, :].reshape(-1)
         gt_mask = targets_c > 0
 
-        if self.pos_weight is None:
-            pos_weight = 1.0 * (~gt_mask).sum().double() / gt_mask.sum().double() # p_c = negative_GT / positive_GT
-        else:
-            pos_weight = self.pos_weight
+        pos_weight = self.pos_weight * (~gt_mask).sum().double() / gt_mask.sum().double()
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         loss = self.bceloss(scores_c, targets_c)
 

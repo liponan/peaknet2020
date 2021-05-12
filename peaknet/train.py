@@ -31,7 +31,7 @@ def train(model, device, params, writer):
     else:
         print("Unrecognized number of classes for loss function.")
         return
-    train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True)
+    train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True, n=params["n_experiments"])
     seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     print("train_dataset", len(train_dataset))
@@ -98,8 +98,18 @@ def train(model, device, params, writer):
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("params", type=str, default=None, help="A json file")
+
+    # System parameters
     p.add_argument("--gpu", "-g", type=int, default=None, help="Use GPU x")
     p.add_argument("--model", "-m", type=str, default=None, help="A .PT file")
+
+    # Parameters for automated experiments (transferred to params.json if not None)
+    # Parameters in params.json
+    p.add_argument("--pos_weight", type=float, default=None)
+    p.add_argument("--cutoff", type=float, default=None)
+
+    # Parameters not in params.json
+    p.add_argument("--n_experiments", type=int, default=-1)
     return p.parse_args()
 
 
@@ -107,12 +117,24 @@ def main():
     args = parse_args()
     params = json.load(open(args.params))
     model = UNet(n_channels=1, n_classes=params["n_classes"], n_filters=params["n_filters"])
+
+    # System parameters
     if args.model:
         model.load_state_dict(torch.load(args.model, map_location="cpu"))
     if args.gpu is not None and torch.cuda.is_available():
         device = torch.device("cuda:{}".format(args.gpu))
     else:
         device = torch.device("cpu")
+
+    # Parameters in params.json
+    if args.pos_weight is not None:
+        params["pos_weight"] = args.pos_weight
+    if args.cutoff is not None:
+        params["cutoff"] = args.cutoff
+
+    # Parameters not in params.json
+    params["n_experiments"] = args.n_experiments
+
     model = model.to(device)
 
     model_dir = os.path.join('debug', params["experiment_name"])
