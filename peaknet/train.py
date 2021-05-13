@@ -151,6 +151,7 @@ def main():
 
     model_dir = os.path.join('debug', params["experiment_name"])
 
+    print("confirm_delete: "+str(args.confirm_delete))
     if os.path.exists(model_dir):
         y = 'y'
         if args.confirm_delete:
