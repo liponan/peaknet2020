@@ -6,7 +6,7 @@
   "weight_decay": 0,
   "cutoff": 0.5,
   "pos_weight": 1.0,
-  "batch_size": 20,
+  "batch_size": 10,
   "num_workers": 0,
   "downsample": 1,
   "n_filters": 24,
