@@ -72,7 +72,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
 
         pos_weight = self.pos_weight * (~gt_mask).sum().double() / gt_mask.sum().double()
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-        loss = self.bceloss(scores_c, targets_c)
+        loss = self.bceloss(scores_c, targets_c) / self.pos_weight
 
         with torch.no_grad():
             n_gt = targets_c.sum()
