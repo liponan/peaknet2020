@@ -78,7 +78,6 @@ def train(model, device, params, writer):
 
             visualize.scalar_metrics(writer, metrics, total_steps)
             total_steps += 1
-            # print("total_steps", total_steps)
 
             loss.backward()
             optimizer.step()
@@ -102,6 +101,8 @@ def train(model, device, params, writer):
                     visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
         psana_images.close()
     saver.save(params["save_name"])
+    torch.save(model, "debug/"+params["experiment_name"]+"/model.pt")
+    print("Model saved at " + "debug/"+params["experiment_name"]+"/model.pt.")
 
 
 def parse_args():
@@ -110,14 +111,14 @@ def parse_args():
 
     # System parameters
     p.add_argument("--gpu", "-g", type=int, default=None, help="Use GPU x")
+
+    # Existing model
     p.add_argument("--model", "-m", type=str, default=None, help="A .PT file")
 
-    # Parameters for automated experiments (transferred to params.json if not None)
-    # Parameters in params.json
-    p.add_argument("--pos_weight", type=float, default=None)
-    p.add_argument("--cutoff", type=float, default=None)
-
-    # Parameters not in params.json
+    # Parameters not in params.json (can be easily modified when calling train.py)
+    p.add_argument("--experiment_name", type=str, default="unet")
+    p.add_argument("--pos_weight", type=float, default=1.0)
+    p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--n_per_run", type=int, default=50000)
     p.add_argument('--confirm_delete', dest='confirm_delete', action='store_true')
@@ -125,33 +126,39 @@ def parse_args():
     p.set_defaults(confirm_delete=True)
     p.add_argument("--saver_type", type=str, default=None)
     p.add_argument("--save_name", type=str, default=None)
+    p.add_argument("--backup_every", type=int, default=500)
+    p.add_argument("--print_every", type=int, default=25)
+    p.add_argument("--upload_every", type=int, default=10)
     return p.parse_args()
 
 
 def main():
     args = parse_args()
     params = json.load(open(args.params))
-    model = UNet(n_channels=1, n_classes=params["n_classes"], n_filters=params["n_filters"])
+    model = UNet(n_channels=1, n_classes=params["n_classes"], n_filters=params["n_filters"], params=params)
 
-    # System parameters
+    # Existing model
     if args.model:
         model.load_state_dict(torch.load(args.model, map_location="cpu"))
+
+    # System parameters
     if args.gpu is not None and torch.cuda.is_available():
         device = torch.device("cuda:{}".format(args.gpu))
     else:
         device = torch.device("cpu")
 
-    # Parameters in params.json
-    if args.pos_weight is not None:
-        params["pos_weight"] = args.pos_weight
-    if args.cutoff is not None:
-        params["cutoff"] = args.cutoff
-
     # Parameters not in params.json
+    params["experiment_name"] = args.experiment_name
+    params["pos_weight"] = args.pos_weight
+    params["cutoff"] = args.cutoff
     params["n_experiments"] = args.n_experiments
+    params["n_per_run"] = args.n_per_run
     params["saver_type"] = args.saver_type
     params["save_name"] = args.save_name
-    params["n_per_run"] = args.n_per_run
+    params["backup_every"] = args.backup_every
+    params["print_every"] = args.print_every
+    params["upload_every"] = args.upload_every
+
 
     model = model.to(device)
 

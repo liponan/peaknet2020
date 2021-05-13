@@ -9,6 +9,7 @@ from loss import PeaknetBCELoss
 from train import check_existence
 import argparse
 
+# Unused file
 
 def extract(scores, conf_cutoff=0.1):
     scores = nn.Sigmoid()(scores)
@@ -24,6 +25,16 @@ def extract(scores, conf_cutoff=0.1):
     output = output.cpu().data.numpy()
     return output
 
+def extract1Channel(scores, conf_cutoff=0.5):
+    scores_c = scores[:, 0, :, :]
+    conf_mask = scores_c > conf_cutoff
+    uv = torch.nonzero(conf_mask)
+    img_idx = uv[:, 0].float()
+    predicted_x = uv[:, 2].float()
+    predicted_y = uv[:, 1].float()
+    output = torch.cat((img_idx[:, None], predicted_x[:, None], predicted_y[:, None], scores_c[conf_mask].unsqueeze(-1)), dim=1)
+    output = output.cpu().data.numpy()
+    return output
 
 def predict(model, device, params):
     model.eval()

@@ -8,7 +8,7 @@ from .unet_parts import *
 
 
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes, n_filters=64, bilinear=True):
+    def __init__(self, n_channels, n_classes, n_filters=64, bilinear=True, params):
         super(UNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
@@ -23,6 +23,10 @@ class UNet(nn.Module):
         self.up3 = Up(n_filters*4, n_filters, bilinear)
         self.up4 = Up(n_filters*2, n_filters, bilinear)
         self.outc = OutConv(n_filters, n_classes)
+
+        # Additional parameters that will be recovered when loading the model
+        self.dataset_path = params["run_dataset_path"]
+        self.downsample = params["downsample"]
 
     def forward(self, x):
         x1 = self.inc(x)
