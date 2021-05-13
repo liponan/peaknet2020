@@ -34,7 +34,7 @@ def evaluate(model, device, params):
 
     saver = Saver(params["saver_type"], None)
 
-    eval_dataset = PSANADataset(model.dataset_path, subset="val", shuffle=True, n=params["n_experiment"])
+    eval_dataset = PSANADataset(model.dataset_path, subset="val", shuffle=True, n=params["n_experiments"])
     seen = 0
 
     total_steps = 0
