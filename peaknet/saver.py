@@ -8,7 +8,7 @@ class Saver():
             self.content = {"params": params, "precision": [], "recall": [], "loss": []}
         elif saver_type == "precision_recall_evaluation":
             print("Precision and recall will be saved in saved_outputs directory.")
-            self.content = {"precision": [], "recall": []}
+            self.content = {"params": params, "precision": [], "recall": []}
         elif saver_type is None:
             print("Data will not be save in saved_outputs directory.")
 

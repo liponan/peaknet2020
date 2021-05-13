@@ -32,7 +32,7 @@ def check_existence(exp, run):
 def evaluate(model, device, params):
     model.eval()
 
-    saver = Saver(params["saver_type"], None)
+    saver = Saver(params["saver_type"], params)
 
     eval_dataset = PSANADataset(model.dataset_path, subset="val", shuffle=True, n=params["n_experiments"])
     seen = 0
