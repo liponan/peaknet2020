@@ -4,7 +4,7 @@ class Saver():
     def __init__(self, saver_type, params):
         self.saver_type = saver_type
         if saver_type=="precision_recall":
-            print("Precision and recall will be saved in saved_outputs directory")
+            print("Precision and recall will be saved in saved_outputs directory.")
             self.content = {"params": params, "precision": [], "recall": []}
         elif saver_type is None:
             print("Data will not be save in saved_outputs directory.")
