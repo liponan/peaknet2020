@@ -20,6 +20,8 @@ def evaluation_metrics(scores, y, cutoff=0.5):
     positives = (nn.Sigmoid()(scores_c) > cutoff)
     n_p = positives.sum()
     n_tp = (positives[gt_mask]).sum()
+    if n_p == 0:
+        n_p = n_tp
     recall = float(n_tp) / max(1, int(n_gt))
     precision = float(n_tp) / max(1, int(n_p))
 
