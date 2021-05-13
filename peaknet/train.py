@@ -94,7 +94,8 @@ def train(model, device, params, writer):
                         else:
                             print_str += key + " " + str(value) + " ; "
                     print(print_str)
-                saver.upload(metrics)
+                if total_steps % params["upload_every"] == 0:
+                    saver.upload(metrics)
                 if total_steps % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                 if total_steps % params["show_image_every"] == 0:

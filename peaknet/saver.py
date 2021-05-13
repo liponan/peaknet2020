@@ -13,6 +13,7 @@ class Saver():
         if self.saver_type == "precision_recall":
             self.content["precision"].append(float(metrics["precision"]))
             self.content["recall"].append(float(metrics["recall"]))
+            self.content["loss"].append(float(metrics["loss"].data.cpu()))
 
     def save(self, save_name):
         if self.saver_type is not None:
