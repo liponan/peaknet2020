@@ -22,20 +22,29 @@ if index_experiment == 1:
 # Experiment #2
 if index_experiment == 2:
     experiment_name = "unet_pw1em3"
-    pw = 1e-3
-    print("---")
-    print("Training Phase")
-    print("---")
-    os.system('python train.py params.json -g 0 --no_confirm_delete '
-              '--experiment_name ' + experiment_name + ' --pos_weight=' + str(pw))
-    print("")
+    training_required = False
+
+    if training_required:
+        pw = 1e-3
+        print("---")
+        print("Training Phase")
+        print("---")
+        os.system('python train.py params.json -g 0 --no_confirm_delete '
+                  '--experiment_name ' + experiment_name + ' --pos_weight=' + str(pw))
+        print("")
     print("---")
     print("Evaluation Phase")
     print("---")
     model_path = "debug/" + experiment_name + "/model.pt"
-    cutoff_eval_list = np.linspace(0.1, 0.9, 9)
+    cutoff_eval_list = 1 - np.logspace(-1, -5, 5)
+    offset_idx = 10
     for i, cutoff_eval in enumerate(cutoff_eval_list):
-        save_name = "eval_cutoff_" + str(i)
+        save_name = "eval_cutoff_" + str(offset_idx + i)
+        print("---")
+        print("Experiment #" + str(i + 1))
+        print("cutoff_eval: " + str(cutoff_eval))
+        print("save_name: " + str(save_name))
+        print("---")
         os.system('python evaluate.py --model_path ' + model_path + ' -g 0 '
                   '--cutoff_eval ' + str(cutoff_eval) + ' --saver_type "precision_recall_evaluation" '
                   '--save_name ' + str(save_name))
