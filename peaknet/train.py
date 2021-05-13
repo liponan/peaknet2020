@@ -165,7 +165,7 @@ def main():
 
         if val == 'y':
             shutil.rmtree(model_dir)
-            print("Directory removed.")
+            print(params["experiment_name"] + " directory removed.")
 
     os.makedirs(model_dir)
 

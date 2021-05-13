@@ -13,5 +13,5 @@ for i, pw in enumerate(pos_weight_list):
     print("pos_weight: "+str(pw))
     print("---")
     save_name = "pos_weight_"+str(i)
-    os.system('python train.py params.json -g 0 --no_confirm_delete --n_experiments 3 --n_per_run 500'
+    os.system('python train.py params.json -g 0 --no_confirm_delete --n_experiments -1 --n_per_run 50000'
               ' --saver_type="precision_recall" --save_name='+str(save_name)+'  --pos_weight='+str(pw))
