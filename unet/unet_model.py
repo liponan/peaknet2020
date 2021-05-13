@@ -8,7 +8,7 @@ from .unet_parts import *
 
 
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes, n_filters=64, bilinear=True, params):
+    def __init__(self, n_channels, n_classes, n_filters=64, bilinear=True, params=None):
         super(UNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
