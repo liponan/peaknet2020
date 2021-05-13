@@ -13,6 +13,6 @@
   "n_filters": 24,
   "backup_every": 100,
   "coor_scale": 0.1,
-  "show_image_every": 5,
+  "show_image_every": 50,
   "n_classes": 1
 }

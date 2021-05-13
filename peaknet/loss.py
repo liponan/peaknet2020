@@ -60,7 +60,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=kernel_MaxPool, padding=padding)
         self.pos_weight = torch.Tensor([pos_weight])
         if device is not None:
-            self.pos_weight.to(device)
+            self.pos_weight = self.pos_weight.to(device)
 
     def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
         if maxpool:
@@ -70,7 +70,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         targets_c = targets[:, 0, :, :].reshape(-1)
         gt_mask = targets_c > 0
 
-        pos_weight = 1.0 * (~gt_mask).sum().double() / gt_mask.sum().double()
+        pos_weight = self.pos_weight * (~gt_mask).sum().double() / gt_mask.sum().double()
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         loss = self.bceloss(scores_c, targets_c)
 
