@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 from data import PSANADataset, PSANAImage
 from unet import UNet
 from loss import PeaknetBCELoss, PeakNetBCE1ChannelLoss
+from saver import Saver
 import visualize
 import shutil
 import argparse
@@ -24,6 +25,7 @@ def check_existence(exp, run):
 
 def train(model, device, params, writer):
     model.train()
+
     if params["n_classes"] == 3:
         loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"], device=device).to(device)
     elif params["n_classes"] == 1:
@@ -31,6 +33,9 @@ def train(model, device, params, writer):
     else:
         print("Unrecognized number of classes for loss function.")
         return
+
+    saver = Saver(params["saver_type"], params)
+
     train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True, n=params["n_experiments"])
     seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
@@ -88,11 +93,13 @@ def train(model, device, params, writer):
                     else:
                         print_str += key + " " + str(value) + " ; "
                 print(print_str)
+                saver.upload(metrics)
                 if seen % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                 if total_steps % params["show_image_every"] == 0:
                     visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
         psana_images.close()
+        saver.save(params["save_name"])
 
 
 def parse_args():
@@ -110,6 +117,9 @@ def parse_args():
 
     # Parameters not in params.json
     p.add_argument("--n_experiments", type=int, default=-1)
+    p.add_argument("--confirm_delete", type=bool, default=True)
+    p.add_argument("--saver_type", type=str, default=None)
+    p.add_argument("--save_name", type=str, default=None)
     return p.parse_args()
 
 
@@ -134,6 +144,8 @@ def main():
 
     # Parameters not in params.json
     params["n_experiments"] = args.n_experiments
+    params["saver_type"] = args.saver_type
+    params["save_name"] = args.save_name
 
     model = model.to(device)
 
@@ -141,7 +153,11 @@ def main():
 
     if os.path.exists(model_dir):
         y = 'y'
-        val = input("The model directory %s exists. Overwrite? (y/n)" % model_dir)
+        if args.confirm_delete:
+            val = input("The model directory %s exists. Overwrite? (y/n)" % model_dir)
+        else:
+            val = 'y'
+
         if val == 'y':
             shutil.rmtree(model_dir)
             print("Directory removed.")
