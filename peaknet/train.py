@@ -100,7 +100,7 @@ def train(model, device, params, writer):
                 if total_steps % params["show_image_every"] == 0:
                     visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
         psana_images.close()
-        saver.save(params["save_name"])
+    saver.save(params["save_name"])
 
 
 def parse_args():
@@ -118,6 +118,7 @@ def parse_args():
 
     # Parameters not in params.json
     p.add_argument("--n_experiments", type=int, default=-1)
+    p.add_argument("--n_per_run", type=int, default=50000)
     p.add_argument('--confirm_delete', dest='confirm_delete', action='store_true')
     p.add_argument('--no_confirm_delete', dest='confirm_delete', action='store_false')
     p.set_defaults(confirm_delete=True)
@@ -149,6 +150,7 @@ def main():
     params["n_experiments"] = args.n_experiments
     params["saver_type"] = args.saver_type
     params["save_name"] = args.save_name
+    params["n_per_run"] = args.n_per_run
 
     model = model.to(device)
 
