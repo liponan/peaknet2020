@@ -138,7 +138,7 @@ class CXILabel(Dataset):
         self.peak_y_center = self.f['entry_1/result_1/peak1'][:self.n_hits, :]
         #self.peak_w = self.f['entry_1/result_1/peak4'][:self.n_hits, :]
         #self.peak_h = self.f['entry_1/result_1/peak3'][:self.n_hits, :]
-        self.detector = str(self.f["entry_1/instrument_1/detector_1/description"].[()])
+        self.detector = str(self.f["entry_1/instrument_1/detector_1/description"][()])
         
     def __len__(self):
         return self.n_hits
