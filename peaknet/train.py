@@ -118,6 +118,9 @@ def parse_args():
     # Parameters not in params.json
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--confirm_delete", type=bool, default=True)
+    p.add_argument('--confirm_delete', dest='confirm_delete', action='store_true')
+    p.add_argument('--no_confirm_delete', dest='confirm_delete', action='store_false')
+    p.set_defaults(confirm_delete=True)
     p.add_argument("--saver_type", type=str, default=None)
     p.add_argument("--save_name", type=str, default=None)
     return p.parse_args()
