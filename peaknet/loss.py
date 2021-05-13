@@ -72,11 +72,11 @@ class PeakNetBCE1ChannelLoss(nn.Module):
 
         pos_weight = self.pos_weight * (~gt_mask).sum().double() / gt_mask.sum().double()
         self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-        loss = self.bceloss(scores_c, targets_c) / self.pos_weight
+        loss = self.bceloss(scores_c, targets_c) / self.pos_weight # the sigmoid is integrated to bceloss
 
         with torch.no_grad():
             n_gt = targets_c.sum()
-            positives = (scores_c > cutoff)
+            positives = (nn.Sigmoid()(scores_c) > cutoff)
             n_p = positives.sum()
             n_tp = (positives[gt_mask]).sum()
             recall = float(n_tp) / max(1, int(n_gt))

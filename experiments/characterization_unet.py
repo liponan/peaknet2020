@@ -36,8 +36,8 @@ if index_experiment == 2:
     print("Evaluation Phase")
     print("---")
     model_path = "debug/" + experiment_name + "/model.pt"
-    cutoff_eval_list = 1 - np.logspace(-1, -5, 5)
-    offset_idx = 10
+    cutoff_eval_list = [1e-3, 1e-2, 5e-2, 1e-1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 0.999]
+    offset_idx = 0
     for i, cutoff_eval in enumerate(cutoff_eval_list):
         save_name = "eval_cutoff_" + str(offset_idx + i)
         print("---")

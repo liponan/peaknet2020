@@ -3,6 +3,7 @@ from glob import glob
 import json
 import torch
 import torch.optim as optim
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from data import PSANADataset, PSANAImage
 from unet import UNet
@@ -16,7 +17,7 @@ def evaluation_metrics(scores, y, cutoff=0.5):
     gt_mask = targets_c > 0
 
     n_gt = targets_c.sum()
-    positives = (scores_c > cutoff)
+    positives = (nn.Sigmoid(scores_c) > cutoff)
     n_p = positives.sum()
     n_tp = (positives[gt_mask]).sum()
     recall = float(n_tp) / max(1, int(n_gt))
