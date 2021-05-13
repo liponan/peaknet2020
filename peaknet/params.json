@@ -14,5 +14,6 @@
   "backup_every": 100,
   "coor_scale": 0.1,
   "show_image_every": 50,
-  "n_classes": 1
+  "n_classes": 1,
+  "print_every": 25
 }

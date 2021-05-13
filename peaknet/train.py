@@ -39,7 +39,7 @@ def train(model, device, params, writer):
     train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True, n=params["n_experiments"])
     seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
-    print("train_dataset", len(train_dataset))
+    # print("train_dataset", len(train_dataset))
 
     # Preloading for visualization
     idx_experiment_visualization = 0
@@ -86,15 +86,16 @@ def train(model, device, params, writer):
                 seen += n
                 # print("seen {:6d}  loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}".
                 #       format(seen, float(loss.data.cpu()), metrics["recall"], metrics["precision"], metrics["rmsd"]))
-                print_str = "seen " + str(seen) + " ; "
-                for (key, value) in metrics.items():
-                    if key == "loss":
-                        print_str += key + " " + str(float(value.data.cpu())) + " ; "
-                    else:
-                        print_str += key + " " + str(value) + " ; "
-                print(print_str)
+                if total_steps % params["print_every"] == 0:
+                    print_str = "seen " + str(seen) + " ; "
+                    for (key, value) in metrics.items():
+                        if key == "loss":
+                            print_str += key + " " + str(float(value.data.cpu())) + " ; "
+                        else:
+                            print_str += key + " " + str(value) + " ; "
+                    print(print_str)
                 saver.upload(metrics)
-                if seen % (params["backup_every"]) == 0:
+                if total_steps % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                 if total_steps % params["show_image_every"] == 0:
                     visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
@@ -153,7 +154,6 @@ def main():
 
     model_dir = os.path.join('debug', params["experiment_name"])
 
-    print("confirm_delete: "+str(args.confirm_delete))
     if os.path.exists(model_dir):
         y = 'y'
         if args.confirm_delete:
