@@ -9,5 +9,5 @@
   "n_filters": 24,
   "coor_scale": 0.1,
   "show_image_every": 500,
-  "n_classes": 1,
+  "n_classes": 1
 }
