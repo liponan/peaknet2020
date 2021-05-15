@@ -5,17 +5,18 @@ import os
 
 os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
-index_experiment = 2
+index_experiment = 1
 
 # Experiment #1
 if index_experiment == 1:
-    pos_weight_list = np.logspace(-4, 0, 5)
+    pos_weight_list = np.logspace(-8, -5, 4)
+    offset_idx = 5
     for i, pw in enumerate(pos_weight_list):
         print("---")
         print("Experiment #" + str(i + 1))
         print("pos_weight: " + str(pw))
         print("---")
-        save_name = "pos_weight_" + str(i)
+        save_name = "pos_weight_" + str(offset_idx + i)
         os.system('python train.py params.json -g 0 --no_confirm_delete --n_experiments -1 --n_per_run 50000'
                   ' --saver_type "precision_recall" --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
