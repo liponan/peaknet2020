@@ -92,7 +92,7 @@ def parse_args():
     p.add_argument("--save_name", type=str, default=None)
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--n_per_run", type=int, default=50000)
-    p.add_argument("--batch_size", type=int, default=10)
+    p.add_argument("--batch_size", type=int, default=5)
 
     return p.parse_args()
 
