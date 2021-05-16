@@ -5,7 +5,7 @@ import os
 
 os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
-index_experiment = 1
+index_experiment = 3
 
 # Experiment #1
 if index_experiment == 1:
@@ -55,7 +55,7 @@ if index_experiment == 2:
 # Experiment #3
 if index_experiment == 3:
     experiment_name = "unet_pw1em4"
-    training_required = True
+    training_required = False
     pw = 1e-4
     save_prefix = "eval_cutoff_2_"
 
@@ -70,8 +70,9 @@ if index_experiment == 3:
     print("Evaluation Phase")
     print("---")
     model_path = "debug/" + experiment_name + "/model.pt"
-    cutoff_eval_list = [1e-3, 1e-2, 5e-2, 1e-1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 0.999]
-    offset_idx = 0
+    cutoff_eval_list = [1e-3, 1e-2, 5e-2, 1e-1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.98, 0.99, 0.995, 0.998, 0.999]
+    cutoff_eval_list = cutoff_eval_list[9:]
+    offset_idx = 9
     for i, cutoff_eval in enumerate(cutoff_eval_list):
         save_name = save_prefix + str(offset_idx + i)
         print("---")
