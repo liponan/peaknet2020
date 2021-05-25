@@ -20,6 +20,6 @@ class AdaFilter_0(nn.Module):
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
-        x.view(-1, self.C, h, w)
+        x = x.view(-1, self.C, h, w)
         logits = self.gen_peak_finding(x)
         return logits

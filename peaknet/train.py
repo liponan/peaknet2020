@@ -119,7 +119,7 @@ def parse_args():
     p.add_argument("--model", "-m", type=str, default=None, help="A .PT file")
 
     # Parameters not in params.json (can be easily modified when calling train.py)
-    p.add_argument("--experiment_name", type=str, default="unet")
+    p.add_argument("--experiment_name", type=str, default=None)
     p.add_argument("--pos_weight", type=float, default=1.0)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
@@ -161,7 +161,10 @@ def main():
         device = torch.device("cpu")
 
     # Parameters not in params.json
-    params["experiment_name"] = args.experiment_name
+    if args.experiment_name is not None:
+        params["experiment_name"] = args.experiment_name
+    else:
+        params["experiment_name"] = params["model"]
     params["pos_weight"] = args.pos_weight
     params["cutoff"] = args.cutoff
     params["n_experiments"] = args.n_experiments
