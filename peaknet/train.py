@@ -17,6 +17,7 @@ from saver import Saver
 import visualize
 import shutil
 import argparse
+import time
 
 
 def check_existence(exp, run):
@@ -68,6 +69,7 @@ def train(model, device, params, writer):
         data_loader = DataLoader(psana_images, batch_size=params["batch_size"], shuffle=True, drop_last=True,
                                  num_workers=params["num_workers"])
         for j, (x, y) in enumerate(data_loader):
+            tic = time.time()
             optimizer.zero_grad()
             n = x.size(0)
             h, w = x.size(2), x.size(3)
@@ -88,7 +90,7 @@ def train(model, device, params, writer):
                 seen += n
                 # print("seen {:6d}  loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}".
                 #       format(seen, float(loss.data.cpu()), metrics["recall"], metrics["precision"], metrics["rmsd"]))
-                if total_steps % params["print_every"] == 0:
+                if seen % params["print_every"] == 0:
                     print_str = "seen " + str(seen) + " ; "
                     for (key, value) in metrics.items():
                         if key == "loss":
@@ -96,12 +98,15 @@ def train(model, device, params, writer):
                         else:
                             print_str += key + " " + str(value) + " ; "
                     print(print_str)
-                if total_steps % params["upload_every"] == 0:
+                if seen % params["upload_every"] == 0:
                     saver.upload(metrics)
-                if total_steps % (params["backup_every"]) == 0:
+                if seen % (params["backup_every"]) == 0:
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
-                if total_steps % params["show_image_every"] == 0:
+                if seen % params["show_image_every"] == 0:
                     visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
+
+            toc = time.time()
+            print(str((toc - tic) / params["batch_size"]) + " sec per sample")
         psana_images.close()
     saver.save(params["save_name"])
     torch.save(model, "debug/"+params["experiment_name"]+"/model.pt")
@@ -120,7 +125,7 @@ def parse_args():
 
     # Parameters not in params.json (can be easily modified when calling train.py)
     p.add_argument("--experiment_name", type=str, default=None)
-    p.add_argument("--pos_weight", type=float, default=1e-2)
+    p.add_argument("--pos_weight", type=float, default=1e-1)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--n_per_run", type=int, default=50000)
