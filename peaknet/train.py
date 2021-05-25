@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from data import PSANADataset, PSANAImage
 from unet import UNet
+from models import AdaFilter_0
 from loss import PeaknetBCELoss, PeakNetBCE1ChannelLoss
 from saver import Saver
 import visualize
@@ -70,7 +71,9 @@ def train(model, device, params, writer):
             optimizer.zero_grad()
             n = x.size(0)
             h, w = x.size(2), x.size(3)
-            x = x.view(-1, 1, h, w).to(device) # each panel is treated independently !!0
+            x = x.to(device)
+            y = y.to(device)
+            # x = x.view(-1, 1, h, w).to(device) # each panel is treated independently !!0
             y = y.view(-1, 3, h, w).to(device)
             scores = model(x)
             metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
@@ -131,11 +134,21 @@ def parse_args():
     p.add_argument("--upload_every", type=int, default=10)
     return p.parse_args()
 
+def load_model(params):
+    if params["model"] == "UNet":
+        model = UNet(n_channels=1, n_classes=params["n_classes"], n_filters=params["n_filters"], params=params)
+    elif params["model"] == "model_0":
+        model = AdaFilter_0(params=params)
+    else:
+        print("Unrecognized model.")
+        model = None
+    return model
+
 
 def main():
     args = parse_args()
     params = json.load(open(args.params))
-    model = UNet(n_channels=1, n_classes=params["n_classes"], n_filters=params["n_filters"], params=params)
+    model = load_model(params)
 
     # Existing model
     if args.model:

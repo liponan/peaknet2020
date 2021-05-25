@@ -1,14 +1,11 @@
 {
   "run_dataset_path": "/cds/home/a/axlevy/peaknet2020/data/cxic0415_new.csv",
-  "model": "UNet",
+  "model": "model_0",
   "verbose": false,
   "lr": 0.01,
   "weight_decay": 0,
   "batch_size": 2,
   "num_workers": 0,
-  "downsample": 1,
-  "n_filters": 24,
-  "coor_scale": 0.1,
   "show_image_every": 500,
   "n_classes": 1
 }

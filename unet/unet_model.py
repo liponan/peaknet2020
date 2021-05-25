@@ -29,6 +29,8 @@ class UNet(nn.Module):
         self.downsample = params["downsample"]
 
     def forward(self, x):
+        h, w = x.size(2), x.size(3)
+        x = x.view(-1, 1, h, w)
         x1 = self.inc(x)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
