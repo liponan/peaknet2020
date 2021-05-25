@@ -10,7 +10,7 @@ class Saver():
             print("Precision and recall will be saved in saved_outputs directory.")
             self.content = {"params": params, "precision": [], "recall": []}
         elif saver_type is None:
-            print("Data will not be save in saved_outputs directory.")
+            print("Data will not be saved in saved_outputs directory.")
 
     def upload(self, metrics):
         if self.saver_type == "precision_recall":
