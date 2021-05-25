@@ -52,9 +52,8 @@ class PeaknetBCELoss(nn.Module):
 
 class PeakNetBCE1ChannelLoss(nn.Module):
 
-    def __init__(self, coor_scale=1, pos_weight=1.0, kernel_MaxPool=3, device=None):
+    def __init__(self, pos_weight=1.0, kernel_MaxPool=3, device=None):
         super(PeakNetBCE1ChannelLoss, self).__init__()
-        self.coor_scale = coor_scale
         self.bceloss = None
         padding = (kernel_MaxPool - 1)//2
         self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=kernel_MaxPool, padding=padding)

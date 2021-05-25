@@ -30,7 +30,7 @@ def train(model, device, params, writer):
     if params["n_classes"] == 3:
         loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"], device=device).to(device)
     elif params["n_classes"] == 1:
-        loss_func = PeakNetBCE1ChannelLoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"], device=device).to(device)
+        loss_func = PeakNetBCE1ChannelLoss(pos_weight=params["pos_weight"], device=device).to(device)
     else:
         print("Unrecognized number of classes for loss function.")
         return
