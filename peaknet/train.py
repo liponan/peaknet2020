@@ -91,6 +91,8 @@ def train(model, device, params, writer):
                 # print("seen {:6d}  loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}".
                 #       format(seen, float(loss.data.cpu()), metrics["recall"], metrics["precision"], metrics["rmsd"]))
                 if seen % params["print_every"] == 0:
+                    toc = time.time()
+                    print(str((toc - tic) / params["batch_size"] * 1e3) + " ms per sample")
                     print_str = "seen " + str(seen) + " ; "
                     for (key, value) in metrics.items():
                         if key == "loss":
@@ -104,9 +106,6 @@ def train(model, device, params, writer):
                     torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                 if seen % params["show_image_every"] == 0:
                     visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
-
-            toc = time.time()
-            print(str((toc - tic) / params["batch_size"]) + " sec per sample")
         psana_images.close()
     saver.save(params["save_name"])
     torch.save(model, "debug/"+params["experiment_name"]+"/model.pt")
