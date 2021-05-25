@@ -18,7 +18,8 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         plt.yticks([])
 
         # Prediction
-        x = img_vis.to(device)
+        h, w = x.size(1), x.size(2)
+        x = img_vis.view(1, -1, h, w).to(device)
         scores = model(x)
         scores = nn.Sigmoid()(scores).cpu().numpy()
         indices_nonzero = np.array(np.argwhere(scores[i, 0] > params["cutoff"]))
