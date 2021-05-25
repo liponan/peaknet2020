@@ -18,7 +18,7 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         plt.yticks([])
 
         # Prediction
-        h, w = x.size(1), x.size(2)
+        h, w = img_vis.size(1), img_vis.size(2)
         x = img_vis.view(1, -1, h, w).to(device)
         scores = model(x)
         scores = nn.Sigmoid()(scores).cpu().numpy()
