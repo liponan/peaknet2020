@@ -49,6 +49,7 @@ def train(model, device, params, writer):
     psana_images_vis = PSANAImage(cxi_path_vis, exp_vis, run_vis, downsample=params["downsample"], n=params["n_per_run"])
 
     idx_event_visualization = len(psana_images_vis) // 2
+    print("idx_event_visualization: "+str(idx_event_visualization))
     img_vis, target_vis = psana_images_vis[idx_event_visualization]
 
     total_steps = 0
