@@ -14,7 +14,7 @@ class AdaFilter_0(nn.Module):
                                    nn.ReLU())
         k2 = 3
         out2 = 1
-        pad2 = (k1 - 1) // 2
+        pad2 = (k2 - 1) // 2
         conv2 = nn.Conv2d(out1, out2, k2, padding=pad2, padding_mode='reflect')
         self.gen_peak_finding = nn.Sequential(conv1, conv2)
 
