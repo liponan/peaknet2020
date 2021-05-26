@@ -39,7 +39,6 @@ def train(model, device, params, writer):
     saver = Saver(params["saver_type"], params)
 
     train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True, n=params["n_experiments"])
-    seen = 0
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     # print("train_dataset", len(train_dataset))
 
@@ -53,6 +52,8 @@ def train(model, device, params, writer):
     img_vis, target_vis = psana_images_vis[idx_event_visualization]
 
     total_steps = 0
+    seen = 0
+    seen_and_missed = 0
     for i, (cxi_path, exp, run) in enumerate(train_dataset):
         #if os.path.isfile("good_cxi/{}_{}".format(exp, run)):
         #    pass
@@ -66,18 +67,21 @@ def train(model, device, params, writer):
         print("*********************************************************************")
         print("[{:}] exp: {}  run: {}\ncxi: {}".format(i, exp, run, cxi_path))
         print("*********************************************************************")
-        psana_images = PSANAImage(cxi_path, exp, run, downsample=params["downsample"], n=params["n_per_run"])
+        psana_images = PSANAImage(cxi_path, exp, run, downsample=params["downsample"], n=params["n_per_run"],
+                                  min_det_peaks=params["min_det_peaks"])
         data_loader = DataLoader(psana_images, batch_size=params["batch_size"], shuffle=True, drop_last=True,
                                  num_workers=params["num_workers"])
-        for j, (x, y) in enumerate(data_loader):
+        for j, (x, y, n_trials) in enumerate(data_loader):
             tic = time.time()
             optimizer.zero_grad()
             n = x.size(0)
+            seen += n
+            seen_and_missed += n_trials.sum()
             h, w = x.size(2), x.size(3)
             x = x.to(device)
             y = y.to(device)
-            # x = x.view(-1, 1, h, w).to(device) # each panel is treated independently !!0
             y = y.view(-1, 3, h, w).to(device)
+
             scores = model(x)
             metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
             loss = metrics["loss"]
@@ -88,13 +92,12 @@ def train(model, device, params, writer):
             loss.backward()
             optimizer.step()
             with torch.no_grad():
-                seen += n
-                # print("seen {:6d}  loss {:7.5f}  recall  {:.3f}  precision {:.3f}  RMSD {:.3f}".
-                #       format(seen, float(loss.data.cpu()), metrics["recall"], metrics["precision"], metrics["rmsd"]))
                 if seen % params["print_every"] == 0:
                     toc = time.time()
                     print(str((toc - tic) / params["batch_size"] * 1e3) + " ms per sample")
                     print_str = "seen " + str(seen) + " ; "
+                    ratio_real_hits = seen / seen_and_missed
+                    print_str += "ratio used " + str(ratio_real_hits) + " ; "
                     for (key, value) in metrics.items():
                         if key == "loss":
                             print_str += key + " " + str(float(value.data.cpu())) + " ; "
@@ -137,6 +140,7 @@ def parse_args():
     p.add_argument("--backup_every", type=int, default=500)
     p.add_argument("--print_every", type=int, default=25)
     p.add_argument("--upload_every", type=int, default=10)
+    p.add_argument("--min_det_peaks", type=int, default=-1)
     return p.parse_args()
 
 def load_model(params):
@@ -179,6 +183,7 @@ def main():
     params["backup_every"] = args.backup_every
     params["print_every"] = args.print_every
     params["upload_every"] = args.upload_every
+    params["min_det_peaks"] = args.min_det_peaks
 
 
     model = model.to(device)

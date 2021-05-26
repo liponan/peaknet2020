@@ -28,8 +28,8 @@ class PSANADataset(Dataset):
 
 class PSANAImage(Dataset):
 
-    def __init__(self, cxi_path, exp, run, normalize=True, downsample=1, debug=True,
-                 max_cutoff=1024, mode="peaknet2020", shuffle=False, n=-1):
+    def __init__(self, cxi_path, exp, run, normalize=False, downsample=1, debug=True,
+                 max_cutoff=1024, mode="peaknet2020", shuffle=False, n=-1, min_det_peaks=-1):
         self.downsample = downsample
         self.cxi = CXILabel(cxi_path)
         self.detector = self.cxi.detector  # "CxiDs2.0:Cspad.0"#
@@ -43,6 +43,7 @@ class PSANAImage(Dataset):
         self.psana = PSANAReader(exp, run, self.detector)
         self.psana.build()
         self.mode = mode
+        self.min_det_peaks = min_det_peaks
         if shuffle:
             self.rand_idxs = np.random.permutation(len(self.cxi))
             self.rand_idxs = self.rand_idxs[:self.n]
@@ -78,10 +79,14 @@ class PSANAImage(Dataset):
 
     def __getitem__(self, idx):
         event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
-        #         print(event, "s", s, "r", r, "c", c)
+        n_trials = 1
+        while len(s) < self.min_det_peaks:
+            idx += 1
+            n_trials += 1
+            event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
         img = self.psana.load_img(event_idx)
+        img[img < 0] = 0
         if self.normalize:
-            img[img < 0] = 0
             img = img / max(0.01, np.std(img)) # why max 0.01?
             img = img - np.mean(img)
             # img = img / max(np.max(img), self.max_cutoff)
@@ -93,7 +98,9 @@ class PSANAImage(Dataset):
             img_tensor = torch.zeros(img.shape[0], h_pad, w_pad)
             img_tensor[:, 0:img.shape[1], 0:img.shape[2]] = torch.from_numpy(img)
             label_tensor = self.make_label(s, r, c, n_panels=img.shape[0], h=h_ds, w=w_ds)
-            return img_tensor, label_tensor
+            n_trials_tensor = torch.zeros(1)
+            n_trials_tensor[0] = n_trials
+            return img_tensor, label_tensor, n_trials_tensor
         else:  # YOLO mode
             labels = self.make_yolo_labels(s, r, c)
             return img, labels
