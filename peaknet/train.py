@@ -45,7 +45,8 @@ def train(model, device, params, writer):
     # Preloading for visualization
     idx_experiment_visualization = 0
     cxi_path_vis, exp_vis, run_vis = train_dataset[idx_experiment_visualization]
-    psana_images_vis = PSANAImage(cxi_path_vis, exp_vis, run_vis, downsample=params["downsample"], n=params["n_per_run"])
+    psana_images_vis = PSANAImage(cxi_path_vis, exp_vis, run_vis, downsample=params["downsample"],
+                                  n=params["n_per_run"], min_det_peaks=params["min_det_peaks"])
 
     idx_event_visualization = len(psana_images_vis) // 2
     print("idx_event_visualization: "+str(idx_event_visualization))
@@ -76,7 +77,7 @@ def train(model, device, params, writer):
             optimizer.zero_grad()
             n = x.size(0)
             seen += n
-            seen_and_missed += n_trials.sum()
+            seen_and_missed += n_trials.sum().item()
             h, w = x.size(2), x.size(3)
             x = x.to(device)
             y = y.to(device)
@@ -140,7 +141,7 @@ def parse_args():
     p.add_argument("--backup_every", type=int, default=500)
     p.add_argument("--print_every", type=int, default=25)
     p.add_argument("--upload_every", type=int, default=10)
-    p.add_argument("--min_det_peaks", type=int, default=-1)
+    p.add_argument("--min_det_peaks", type=int, default=10)
     return p.parse_args()
 
 def load_model(params):
