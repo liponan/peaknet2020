@@ -49,7 +49,7 @@ def train(model, device, params, writer):
                                   n=params["n_per_run"], min_det_peaks=params["min_det_peaks"])
 
     idx_event_visualization = len(psana_images_vis) // 2
-    print("idx_event_visualization: "+str(idx_event_visualization))
+    # print("idx_event_visualization: "+str(idx_event_visualization))
     img_vis, target_vis, _ = psana_images_vis[idx_event_visualization]
 
     total_steps = 0

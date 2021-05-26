@@ -81,7 +81,7 @@ class PSANAImage(Dataset):
         event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
         n_trials = 1
         while len(s) < self.min_det_peaks:
-            idx += 1
+            idx = (idx + 1) % self.n
             n_trials += 1
             event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
         img = self.psana.load_img(event_idx)
