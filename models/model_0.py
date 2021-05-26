@@ -6,8 +6,8 @@ class AdaFilter_0(nn.Module):
     def __init__(self, params=None, C=1):
         super(AdaFilter_0, self).__init__()
         self.C = C
-        k1 = 7
-        out1 = 3
+        k1 = 11
+        out1 = 6
         pad1 = (k1-1)//2
         conv1 = nn.Sequential(nn.Conv2d(C, out1, k1, padding=pad1, padding_mode='reflect'),
                                    nn.BatchNorm2d(out1),

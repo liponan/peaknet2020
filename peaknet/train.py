@@ -55,63 +55,67 @@ def train(model, device, params, writer):
     total_steps = 0
     seen = 0
     seen_and_missed = 0
-    for i, (cxi_path, exp, run) in enumerate(train_dataset):
-        #if os.path.isfile("good_cxi/{}_{}".format(exp, run)):
-        #    pass
-        #else:
-        #    continue
-        if check_existence(exp, run):
-            pass
-        else:
-            print("[{:}] exp: {}  run: {}  PRECHECK FAILED".format(i, exp, run))
-            continue
-        print("*********************************************************************")
-        print("[{:}] exp: {}  run: {}\ncxi: {}".format(i, exp, run, cxi_path))
-        print("*********************************************************************")
-        psana_images = PSANAImage(cxi_path, exp, run, downsample=params["downsample"], n=params["n_per_run"],
-                                  min_det_peaks=params["min_det_peaks"])
-        data_loader = DataLoader(psana_images, batch_size=params["batch_size"], shuffle=True, drop_last=True,
-                                 num_workers=params["num_workers"])
-        for j, (x, y, n_trials) in enumerate(data_loader):
-            tic = time.time()
-            optimizer.zero_grad()
-            n = x.size(0)
-            seen += n
-            seen_and_missed += n_trials.sum().item()
-            h, w = x.size(2), x.size(3)
-            x = x.to(device)
-            y = y.to(device)
-            y = y.view(-1, 3, h, w).to(device)
+    for epoch in range(params["n_epochs"]):
+        print("")
+        print("*** Epoch "+str(epoch)+" ***")
+        print("")
+        for i, (cxi_path, exp, run) in enumerate(train_dataset):
+            #if os.path.isfile("good_cxi/{}_{}".format(exp, run)):
+            #    pass
+            #else:
+            #    continue
+            if check_existence(exp, run):
+                pass
+            else:
+                print("[{:}] exp: {}  run: {}  PRECHECK FAILED".format(i, exp, run))
+                continue
+            print("*********************************************************************")
+            print("[{:}] exp: {}  run: {}\ncxi: {}".format(i, exp, run, cxi_path))
+            print("*********************************************************************")
+            psana_images = PSANAImage(cxi_path, exp, run, downsample=params["downsample"], n=params["n_per_run"],
+                                      min_det_peaks=params["min_det_peaks"])
+            data_loader = DataLoader(psana_images, batch_size=params["batch_size"], shuffle=True, drop_last=True,
+                                     num_workers=params["num_workers"])
+            for j, (x, y, n_trials) in enumerate(data_loader):
+                tic = time.time()
+                optimizer.zero_grad()
+                n = x.size(0)
+                seen += n
+                seen_and_missed += n_trials.sum().item()
+                h, w = x.size(2), x.size(3)
+                x = x.to(device)
+                y = y.to(device)
+                y = y.view(-1, 3, h, w).to(device)
 
-            scores = model(x)
-            metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
-            loss = metrics["loss"]
+                scores = model(x)
+                metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
+                loss = metrics["loss"]
 
-            visualize.scalar_metrics(writer, metrics, total_steps)
-            total_steps += 1
+                visualize.scalar_metrics(writer, metrics, total_steps)
+                total_steps += 1
 
-            loss.backward()
-            optimizer.step()
-            with torch.no_grad():
-                if seen % params["print_every"] == 0:
-                    toc = time.time()
-                    print(str((toc - tic) / params["batch_size"] * 1e3) + " ms per sample")
-                    print_str = "seen " + str(seen) + " ; "
-                    ratio_real_hits = seen / seen_and_missed
-                    print_str += "ratio used " + str(ratio_real_hits) + " ; "
-                    for (key, value) in metrics.items():
-                        if key == "loss":
-                            print_str += key + " " + str(float(value.data.cpu())) + " ; "
-                        else:
-                            print_str += key + " " + str(value) + " ; "
-                    print(print_str)
-                if seen % params["upload_every"] == 0:
-                    saver.upload(metrics)
-                if seen % (params["backup_every"]) == 0:
-                    torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
-                if seen % params["show_image_every"] == 0:
-                    visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
-        psana_images.close()
+                loss.backward()
+                optimizer.step()
+                with torch.no_grad():
+                    if seen % params["print_every"] == 0:
+                        toc = time.time()
+                        print(str((toc - tic) / params["batch_size"] * 1e3) + " ms per sample")
+                        print_str = "seen " + str(seen) + " ; "
+                        ratio_real_hits = seen / seen_and_missed
+                        print_str += "ratio used " + str(ratio_real_hits) + " ; "
+                        for (key, value) in metrics.items():
+                            if key == "loss":
+                                print_str += key + " " + str(float(value.data.cpu())) + " ; "
+                            else:
+                                print_str += key + " " + str(value) + " ; "
+                        print(print_str)
+                    if seen % params["upload_every"] == 0:
+                        saver.upload(metrics)
+                    if seen % (params["backup_every"]) == 0:
+                        torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
+                    if seen % params["show_image_every"] == 0:
+                        visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
+            psana_images.close()
     saver.save(params["save_name"])
     torch.save(model, "debug/"+params["experiment_name"]+"/model.pt")
     print("Model saved at " + "debug/"+params["experiment_name"]+"/model.pt.")
@@ -142,6 +146,7 @@ def parse_args():
     p.add_argument("--print_every", type=int, default=25)
     p.add_argument("--upload_every", type=int, default=10)
     p.add_argument("--min_det_peaks", type=int, default=50)
+    p.add_argument("--n_epochs", type=int, default=50)
     return p.parse_args()
 
 def load_model(params):
@@ -185,7 +190,7 @@ def main():
     params["print_every"] = args.print_every
     params["upload_every"] = args.upload_every
     params["min_det_peaks"] = args.min_det_peaks
-
+    params["n_epochs"] = args.n_epochs
 
     model = model.to(device)
 
