@@ -141,7 +141,7 @@ def parse_args():
     p.add_argument("--backup_every", type=int, default=500)
     p.add_argument("--print_every", type=int, default=25)
     p.add_argument("--upload_every", type=int, default=10)
-    p.add_argument("--min_det_peaks", type=int, default=10)
+    p.add_argument("--min_det_peaks", type=int, default=50)
     return p.parse_args()
 
 def load_model(params):
