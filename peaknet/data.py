@@ -80,6 +80,8 @@ class PSANAImage(Dataset):
     def __getitem__(self, idx):
         event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
         n_trials = 1
+        print(s)
+        print(len(s))
         while len(s) < self.min_det_peaks:
             idx += 1
             n_trials += 1
