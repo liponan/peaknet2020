@@ -202,7 +202,7 @@ class iStream:
     def get_eventList(self, fcxi):
         try:
             f = h5py.File(fcxi, 'r')
-            ievent = f['LCLS/eventNumber'].value
+            ievent = f['LCLS/eventNumber'][()]
             f.close()
             return ievent
         except:
