@@ -22,8 +22,12 @@ stop_position  = extract.label.index[which_idx_extract][-3]
 print "extract.label.index[which_idx_extract]:"
 pprint(extract.label.index[which_idx_extract])
 
-print "Stream content of this idx:"
-pprint(extract.content[start_position:stop_position+1])
+for i in range(extract.label.index[which_idx_extract]):
+    pprint(i)
+    pprint(extract.content[i])
+
+# print "Stream content of this idx:"
+# pprint(extract.content[start_position:stop_position+1])
 
 def get_fs_ss_panel(content):
     data = []
