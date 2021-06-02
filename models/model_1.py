@@ -8,7 +8,7 @@ class AdaFilter_1(nn.Module):
 
         padding_mode = 'zeros'
 
-        k_ada_filter_1 = 5
+        k_ada_filter_1 = 1
         in_ada_filter = 32
         out_ada_filter = 32
         groups_ada_filter = 32
@@ -29,19 +29,24 @@ class AdaFilter_1(nn.Module):
         self.ada_filter = nn.Conv2d(in_ada_filter, out_ada_filter, k_ada_filter_1,
                                     padding=pad_ada_filter_1,
                                     padding_mode=padding_mode,
-                                    groups=groups_ada_filter)
-        k1 = 9
-        in1 = 1
-        out1 = 6
-        pad1 = (k1 - 1) // 2
-        conv1 = nn.Sequential(nn.Conv2d(in1, out1, k1, padding=pad1, padding_mode=padding_mode),
-                                   nn.BatchNorm2d(out1),
-                                   nn.ReLU())
-        k2 = 3
-        out2 = 1
-        pad2 = (k2 - 1) // 2
-        conv2 = nn.Conv2d(out1, out2, k2, padding=pad2, padding_mode=padding_mode)
-        self.gen_peak_finding = nn.Sequential(conv1, conv2)
+                                    groups=groups_ada_filter,
+                                    bias=False)
+
+        k_list = [3, 3, 3, 3]
+        in_list = [1, 6, 6, 6]
+        out_list = in_list[1:] + [6]
+        pad_list = [(k - 1) // 2 for k in k_list]
+        conv_list = []
+
+        for i in range(len(k_list)):
+            conv_list.append(nn.Sequential(nn.Conv2d(in_list[i], out_list[i], k_list[i], padding=pad_list[i], padding_mode=padding_mode),
+                                           nn.BatchNorm2d(out_list[i]),
+                                           nn.ReLU()))
+
+        k_out = 1
+        pad_out = (k_out - 1) // 2
+        conv2 = nn.Conv2d(out_list[-1], 1, k_out, padding=pad_out, padding_mode=padding_mode)
+        self.gen_peak_finding = nn.Sequential(*conv_list, conv2)
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
