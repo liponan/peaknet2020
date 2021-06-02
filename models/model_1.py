@@ -32,12 +32,13 @@ class AdaFilter_1(nn.Module):
                                     groups=groups_ada_filter,
                                     bias=False)
 
-        k_list = [3, 3, 3, 3]
-        in_list = [1, 6, 6, 6]
-        out_list = in_list[1:] + [6]
+        k_list = [3, 3, 3]
+        in_list = [1, 6, 6]
+        out_last = [6]
+
+        out_list = in_list[1:] + out_last
         pad_list = [(k - 1) // 2 for k in k_list]
         conv_list = []
-
         for i in range(len(k_list)):
             conv_list.append(nn.Sequential(nn.Conv2d(in_list[i], out_list[i], k_list[i], padding=pad_list[i], padding_mode=padding_mode),
                                            nn.BatchNorm2d(out_list[i]),
