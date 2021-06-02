@@ -17,7 +17,8 @@ print "Number of Reflection lists in stream: ", len(extract.label.index)
 serial_numbers = []
 
 def get_serial_number(line):
-    id = int(line.split()[1])
+    id = int(line.split()[3])
+    return id
 
 for which_idx_extract in range(len(extract.label.index)):
     # print "idx:"
@@ -25,8 +26,11 @@ for which_idx_extract in range(len(extract.label.index)):
     image_serial_number_pos = extract.label.index[which_idx_extract][0] + 3
     first_indexed_peak_pos = extract.label.index[which_idx_extract][6] + 2
     last_indexed_peak_pos = extract.label.index[which_idx_extract][-3] - 1 #this position must be included
-    print "Image serial number:"
-    pprint(extract.content[image_serial_number_pos].split())
+    # print "Image serial number:"
+    # pprint(extract.content[image_serial_number_pos].split())
+    serial_numbers.append(get_serial_number(extract.content[image_serial_number_pos]))
+
+pprint(np.sort(serial_numbers))
 
 # print "Stream content of this idx:"
 # pprint(extract.content[start_position:stop_position+1])
