@@ -10,6 +10,7 @@ def scalar_metrics(writer, metrics, total_steps):
 def show_weights_model(writer, model):
     print("*** WEIGHTS ***")
     for param_tensor in model.state_dict():
+        print(param_tensor)
         np_array = model.state_dict()[param_tensor]
         print(np_array)
         print(np_array.shape)
