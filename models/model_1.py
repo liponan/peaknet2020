@@ -13,19 +13,23 @@ class AdaFilter_1(nn.Module):
         out_ada_filter = 32
         groups_ada_filter = 32
         pad_ada_filter_1 = (k_ada_filter_1 - 1) // 2
-        conv_ada_filter_1 = nn.Sequential(nn.Conv2d(in_ada_filter, out_ada_filter, k_ada_filter_1,
-                                                       padding=pad_ada_filter_1,
-                                                       padding_mode=padding_mode,
-                                                       groups=groups_ada_filter),
-                                             nn.BatchNorm2d(out_ada_filter),
-                                             nn.ReLU())
-        k_ada_filter_2 = 5
-        pad_ada_filter_2 = (k_ada_filter_2 - 1) // 2
-        conv_ada_filter_2 = nn.Conv2d(out_ada_filter, out_ada_filter, k_ada_filter_2,
-                                           padding=pad_ada_filter_2,
-                                           padding_mode=padding_mode,
-                                           groups=groups_ada_filter)
-        self.ada_filter = nn.Sequential(conv_ada_filter_1, conv_ada_filter_2)
+        # conv_ada_filter_1 = nn.Sequential(nn.Conv2d(in_ada_filter, out_ada_filter, k_ada_filter_1,
+        #                                                padding=pad_ada_filter_1,
+        #                                                padding_mode=padding_mode,
+        #                                                groups=groups_ada_filter),
+        #                                      nn.BatchNorm2d(out_ada_filter),
+        #                                      nn.ReLU())
+        # k_ada_filter_2 = 5
+        # pad_ada_filter_2 = (k_ada_filter_2 - 1) // 2
+        # conv_ada_filter_2 = nn.Conv2d(out_ada_filter, out_ada_filter, k_ada_filter_2,
+        #                                    padding=pad_ada_filter_2,
+        #                                    padding_mode=padding_mode,
+        #                                    groups=groups_ada_filter)
+        # self.ada_filter = nn.Sequential(conv_ada_filter_1, conv_ada_filter_2)
+        self.ada_filter = nn.Conv2d(in_ada_filter, out_ada_filter, k_ada_filter_1,
+                                    padding=pad_ada_filter_1,
+                                    padding_mode=padding_mode,
+                                    groups=groups_ada_filter)
         k1 = 9
         in1 = 1
         out1 = 6

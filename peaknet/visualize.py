@@ -7,6 +7,14 @@ def scalar_metrics(writer, metrics, total_steps):
     for (key, value) in metrics.items():
         writer.add_scalar(key, value, total_steps)
 
+def show_weights_model(writer, model):
+    print("*** WEIGHTS ***")
+    for param_tensor in model.state_dict():
+        np_array = model.state_dict()[param_tensor]
+        print(np_array)
+        print(np_array.shape)
+        print()
+
 def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model, n=32):
     for i in range(n):
         panel_name = 'panel_'+str(i)

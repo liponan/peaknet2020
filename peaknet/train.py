@@ -115,6 +115,7 @@ def train(model, device, params, writer):
                         torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                     if seen % params["show_image_every"] == 0:
                         visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
+                        visualize.show_weights_model(writer, model)
             psana_images.close()
     saver.save(params["save_name"])
     torch.save(model, "debug/"+params["experiment_name"]+"/model.pt")
