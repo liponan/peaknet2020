@@ -32,6 +32,7 @@ class AdaFilter_1(nn.Module):
                                                   padding_mode=padding_mode,
                                                   groups=groups_ada_filter,
                                                   bias=False),
+                                        nn.BatchNorm2d(out_ada_filter),
                                         nn.ReLU())
 
         k_list = [3, 3, 3]
