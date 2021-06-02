@@ -9,8 +9,8 @@ def scalar_metrics(writer, metrics, total_steps):
 
 def show_weights_model(writer, model):
     print("*** WEIGHTS ***")
-    np_array = model.state_dict()['ada_filter.weight']
-    print(np_array)
+    # np_array = model.state_dict()['ada_filter.weight']
+    # print(np_array)
 
 def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model, n=32):
     for i in range(n):
