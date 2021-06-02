@@ -22,9 +22,6 @@ stop_position  = extract.label.index[which_idx_extract][-3]
 print "extract.label.index[which_idx_extract]:"
 pprint(extract.label.index[which_idx_extract])
 
-print "Full stream content of this idx:"
-pprint(extract.content)
-
 print "Stream content of this idx:"
 pprint(extract.content[start_position:stop_position+1])
 
