@@ -19,6 +19,12 @@ which_idx_extract = 0
 start_position = extract.label.index[which_idx_extract][6]
 stop_position  = extract.label.index[which_idx_extract][-3]
 
+print "extract.label.index[which_idx_extract]:"
+pprint(extract.label.index[which_idx_extract])
+
+print "Full stream content of this idx:"
+pprint(extract.content)
+
 print "Stream content of this idx:"
 pprint(extract.content[start_position:stop_position+1])
 
@@ -31,6 +37,6 @@ def get_fs_ss_panel(content):
         data.append((fs, ss, panel))
     return data
 
-fs_ss_panel_list = get_fs_ss_panel(extract.content[start_position:stop_position+1])
+# fs_ss_panel_list = get_fs_ss_panel(extract.content[start_position:stop_position+1])
 
-pprint(fs_ss_panel_list)
+# pprint(fs_ss_panel_list)
