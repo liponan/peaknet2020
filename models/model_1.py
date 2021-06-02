@@ -26,11 +26,13 @@ class AdaFilter_1(nn.Module):
         #                                    padding_mode=padding_mode,
         #                                    groups=groups_ada_filter)
         # self.ada_filter = nn.Sequential(conv_ada_filter_1, conv_ada_filter_2)
-        self.ada_filter = nn.Conv2d(in_ada_filter, out_ada_filter, k_ada_filter_1,
-                                    padding=pad_ada_filter_1,
-                                    padding_mode=padding_mode,
-                                    groups=groups_ada_filter,
-                                    bias=False)
+        self.ada_filter = nn.Sequential(nn.ReLU(),
+                                        nn.Conv2d(in_ada_filter, out_ada_filter, k_ada_filter_1,
+                                                  padding=pad_ada_filter_1,
+                                                  padding_mode=padding_mode,
+                                                  groups=groups_ada_filter,
+                                                  bias=False),
+                                        nn.ReLU())
 
         k_list = [3, 3, 3]
         in_list = [1, 6, 1]
