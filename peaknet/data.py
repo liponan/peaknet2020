@@ -28,7 +28,7 @@ class PSANADataset(Dataset):
 
 class PSANAImage(Dataset):
 
-    def __init__(self, cxi_path, exp, run, normalize=True, downsample=1, debug=True,
+    def __init__(self, cxi_path, exp, run, normalize=False, downsample=1, debug=True,
                  max_cutoff=1024, mode="peaknet2020", shuffle=False, n=-1, min_det_peaks=-1):
         self.downsample = downsample
         self.cxi = CXILabel(cxi_path)
