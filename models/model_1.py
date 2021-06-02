@@ -45,8 +45,9 @@ class AdaFilter_1(nn.Module):
 
         k_out = 1
         pad_out = (k_out - 1) // 2
-        conv2 = nn.Conv2d(out_list[-1], 1, k_out, padding=pad_out, padding_mode=padding_mode)
-        self.gen_peak_finding = nn.Sequential(*conv_list, conv2)
+        conv_out = nn.Conv2d(out_list[-1], 1, k_out, padding=pad_out, padding_mode=padding_mode)
+        conv_list.append(conv_out)
+        self.gen_peak_finding = nn.Sequential(*conv_list)
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
