@@ -22,7 +22,7 @@ stop_position  = extract.label.index[which_idx_extract][-3]
 print "extract.label.index[which_idx_extract]:"
 pprint(extract.label.index[which_idx_extract])
 
-for i in range(extract.label.index[which_idx_extract]):
+for i in extract.label.index[which_idx_extract]:
     pprint(i)
     pprint(extract.content[i])
 
