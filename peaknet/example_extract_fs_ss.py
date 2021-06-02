@@ -4,7 +4,8 @@ from pprint import pprint
 from streamManager import iStream
 
 
-path_stream = "/reg/data/ana03/scratch/zhensu/share/axel/test.stream"
+#path_stream = "/reg/data/ana03/scratch/zhensu/share/axel/test.stream"
+path_stream = "/cds/data/psdm/cxi/cxic0415/scratch/axlevy/psocake/r0100/cxic0415_0100_py2peaknet1.stream"
 
 extract = iStream()
 extract.initial(fstream = path_stream)
