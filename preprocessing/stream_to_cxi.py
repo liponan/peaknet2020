@@ -129,6 +129,7 @@ def main():
         XPos = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
         YPos = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
         Panel = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
+        print(XPos.shape)
 
         for idx_list in range(args.events_per_cxi):
             print("List " + str(idx_list))
