@@ -29,9 +29,10 @@ class PSANADataset(Dataset):
 class PSANAImage(Dataset):
 
     def __init__(self, cxi_path, exp, run, normalize=False, downsample=1, debug=True,
-                 max_cutoff=1024, mode="peaknet2020", shuffle=False, n=-1, min_det_peaks=-1):
+                 max_cutoff=1024, mode="peaknet2020", shuffle=False, n=-1, min_det_peaks=-1, use_indexed_peaks=False):
+        self.use_indexed_peaks = use_indexed_peaks
         self.downsample = downsample
-        self.cxi = CXILabel(cxi_path)
+        self.cxi = CXILabel(cxi_path, use_indexed_peaks)
         self.detector = self.cxi.detector  # "CxiDs2.0:Cspad.0"#
         if n == -1:
             self.n = len(self.cxi)
@@ -66,6 +67,14 @@ class PSANAImage(Dataset):
                 label[i, 2, u, v] = np.fmod(my_c[j] / float(self.downsample), 1.0)
         return label
 
+    def make_label_with_idxg(self, s, r, c, s_idxg, r_idxg, c_idxg, n_panels=32, h=24, w=49):
+        label = torch.zeros(n_panels, 6, h, w)
+        label_peaks_only = self.make_label(s, r, c, n_panels=n_panels, h=h, w=w)
+        label_idxg_only = self.make_labels(s_idxg, r_idxg, c_idxg, n_panels=n_panels, h=h, w=w)
+        label[:, :3, :, :] = label_peaks_only
+        label[:, 3:, :, :] = label_idxg_only
+        return label
+
     def make_yolo_labels(self, s, r, c, h_obj=7, w_obj=7):
         n = r.shape[0]
         cls = np.zeros((n,))
@@ -78,12 +87,18 @@ class PSANAImage(Dataset):
         self.psana.ds = None
 
     def __getitem__(self, idx):
-        event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
+        if self.use_indexed_peaks:
+            event_idx, s, r, c, s_idxg, r_idxg, c_idxg = self.cxi[self.rand_idxs[idx]]
+        else:
+            event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
         n_trials = 1
         while len(s) < self.min_det_peaks:
             idx = (idx + 1) % self.n
             n_trials += 1
-            event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
+            if self.use_indexed_peaks:
+                event_idx, s, r, c, s_idxg, r_idxg, c_idxg = self.cxi[self.rand_idxs[idx]]
+            else:
+                event_idx, s, r, c = self.cxi[self.rand_idxs[idx]]
         img = self.psana.load_img(event_idx)
         img[img < 0] = 0
         if self.normalize:
@@ -97,7 +112,10 @@ class PSANAImage(Dataset):
         if self.mode == "peaknet2020":
             img_tensor = torch.zeros(img.shape[0], h_pad, w_pad)
             img_tensor[:, 0:img.shape[1], 0:img.shape[2]] = torch.from_numpy(img)
-            label_tensor = self.make_label(s, r, c, n_panels=img.shape[0], h=h_ds, w=w_ds)
+            if self.use_indexed_peaks:
+                label_tensor = self.make_label_with_indexing(s, r, c, s_idxg, r_idxg, c_idxg, n_panels=img.shape[0], h=h_ds, w=w_ds)
+            else:
+                label_tensor = self.make_label(s, r, c, n_panels=img.shape[0], h=h_ds, w=w_ds)
             n_trials_tensor = torch.zeros(1)
             n_trials_tensor[0] = n_trials
             return img_tensor, label_tensor, n_trials_tensor
@@ -132,20 +150,23 @@ class PSANAReader(object):
         
 class CXILabel(Dataset):
     
-    def __init__(self, cxi_path, fmod=True):
+    def __init__(self, cxi_path, use_indexed_peaks, fmod=True):
         self.f = h5py.File(cxi_path, "r")
         self.nPeaks = self.f["entry_1/result_1/nPeaks"]
         self.n_hits = len(self.nPeaks)
         self.eventIdx = self.f["LCLS/eventNumber"][:self.n_hits]
         self.peak_x_label = self.f['entry_1/result_1/peakXPosRaw'][:self.n_hits, :]
         self.peak_y_label = self.f['entry_1/result_1/peakYPosRaw'][:self.n_hits, :]
-        #self.peak_x_center = self.f['entry_1/result_1/peakXPosRaw'][:self.n_hits, :]
-        #self.peak_y_center = self.f['entry_1/result_1/peakYPosRaw'][:self.n_hits, :]
         self.peak_x_center = self.f['entry_1/result_1/peak2'][:self.n_hits, :]
         self.peak_y_center = self.f['entry_1/result_1/peak1'][:self.n_hits, :]
-        #self.peak_w = self.f['entry_1/result_1/peak4'][:self.n_hits, :]
-        #self.peak_h = self.f['entry_1/result_1/peak3'][:self.n_hits, :]
         self.detector = str(self.f["entry_1/instrument_1/detector_1/description"][()])
+
+        self.use_indexed_peaks = use_indexed_peaks
+        if use_indexed_peaks:
+            self.nIndexedPeaks = self.f["indexing/nIndexedPeaks"]
+            self.indexing_x_center = self.f["indexing/XPos"][:self.n_hits, :]
+            self.indexing_y_center = self.f["indexing/YPos"][:self.n_hits, :]
+            self.indexing_panel = self.f["indexing/panel"][:self.n_hits, :]
         
     def __len__(self):
         return self.n_hits
@@ -158,11 +179,14 @@ class CXILabel(Dataset):
             + 8 * np.floor_divide(self.peak_x_label[idx, 0:my_npeaks], 388)
         my_r = np.fmod(self.peak_y_center[idx, 0:my_npeaks], 185.0)
         my_c = np.fmod(self.peak_x_center[idx, 0:my_npeaks], 388.0)
-        return my_event_idx, my_s, my_r, my_c
-        # psocake style
-#         my_r = self.peak_y_center[idx,0:my_npeaks]
-#         my_c = self.peak_x_center[idx,0:my_npeaks]
-#         return (my_event_idx, my_r, my_c)
+        if self.use_indexed_peaks:
+            my_nIndexedPeaks = self.nIndexedPeaks[idx]
+            my_s_indexing = self.indexing_panel[idx, 0:my_nIndexedPeaks].astype(np.int32)
+            my_r_indexing = np.fmod(self.indexing_y_center[idx, 0:my_nIndexedPeaks], 185.0)
+            my_c_indexing = np.fmod(self.indexing_x_center[idx, 0:my_nIndexedPeaks], 388.0)
+            return my_event_idx, my_s, my_r, my_c, my_s_indexing, my_r_indexing, my_c_indexing
+        else:
+            return my_event_idx, my_s, my_r, my_c
 
     def close(self):
         self.f.close()

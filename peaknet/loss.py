@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import numpy as np
 
 class PeaknetBCELoss(nn.Module):
 
@@ -52,8 +52,11 @@ class PeaknetBCELoss(nn.Module):
 
 class PeakNetBCE1ChannelLoss(nn.Module):
 
-    def __init__(self, pos_weight=1.0, kernel_MaxPool=3, device=None):
+    def __init__(self, pos_weight=1.0, kernel_MaxPool=3, device=None, use_indexed_peaks=False):
         super(PeakNetBCE1ChannelLoss, self).__init__()
+        self.use_indexed_peaks = use_indexed_peaks
+        if use_indexed_peaks:
+            self.maxpool_idxg = nn.MaxPool2d(7, stride=7, padding=3)
         self.bceloss = None
         padding = (kernel_MaxPool - 1)//2
         self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=kernel_MaxPool, padding=padding)
@@ -62,28 +65,58 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             self.pos_weight = self.pos_weight.to(device)
 
     def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
-        if maxpool:
-            scores = self.maxpool(scores)
-            targets = self.maxpool(targets)
-        scores_c = scores[:, 0, :, :].reshape(-1)
-        targets_c = targets[:, 0, :, :].reshape(-1)
-        gt_mask = targets_c > 0
+        if self.use_indexed_peaks:
+            peak_finding = targets[:, 0, :, :].reshape(-1)
+            indexing = self.maxpool(targets)[:, 3, :, :].reshape(-1)
+            peak_finding_mask = peak_finding > 0.5
+            indexing_mask = indexing > 0.5
+            rejected_mask = (peak_finding_mask + indexing_mask) % 2 # A XOR B
+            intersection_mask = peak_finding_mask * indexing_mask # A and B
+            exclusion_mask = (1 - peak_finding_mask) * (1 - indexing_mask) # not A and not B
+            union_mask = peak_finding_mask + indexing_mask - intersection_mask
+            scores_filtered = scores[:, 0, :, :].reshape(-1)
+            scores_filtered[rejected_mask] = -float("Inf")
 
-        pos_weight = self.pos_weight * (~gt_mask).sum().double() / gt_mask.sum().double()
-        self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-        loss = self.bceloss(scores_c, targets_c) / self.pos_weight # the sigmoid is integrated to bceloss
+            pos_weight = self.pos_weight * exclusion_mask.sum().double() / intersection_mask.sum().double()
+            self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+            loss = self.bceloss(scores_filtered, intersection_mask) / self.pos_weight
 
-        with torch.no_grad():
-            n_gt = targets_c.sum()
-            positives = (nn.Sigmoid()(scores_c) > cutoff)
-            n_p = positives.sum()
-            n_tp = (positives[gt_mask]).sum()
-            recall = float(n_tp) / max(1, int(n_gt))
-            precision = float(n_tp) / max(1, int(n_p))
-            if verbose:
-                print("nGT", int(n_gt), "recall", int(n_tp), "nP", int(n_p), "loss", float(loss.data))
-        metrics = {"loss": loss, "recall": recall, "precision": precision}
-        return metrics
+            with torch.no_grad():
+                n_pos_gt = intersection_mask.sum()
+                n_neg_gt = exclusion_mask.sum()
+                scores_c = scores[:, 0, :, :].reshape(-1)
+                positives = (nn.Sigmoid()(scores_c) > cutoff)
+                n_p = positives.sum()
+                n_tp_recall = (positives * intersection_mask).sum()
+                n_tp_prec = (positives * union_mask).sum()
+                recall = float(n_tp_recall) / max(1, int(n_pos_gt))
+                precision = float(n_tp_prec) / max(1, int(n_p))
+            metrics = {"loss": loss, "recall": recall, "precision": precision, "n_pos_gt": n_pos_gt, "n_neg_gt": n_neg_gt}
+            return metrics
+
+        else:
+            if maxpool:
+                scores = self.maxpool(scores)
+                targets = self.maxpool(targets)
+            scores_c = scores[:, 0, :, :].reshape(-1)
+            targets_c = targets[:, 0, :, :].reshape(-1)
+            gt_mask = targets_c > 0.5
+
+            pos_weight = self.pos_weight * (~gt_mask).sum().double() / gt_mask.sum().double()
+            self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+            loss = self.bceloss(scores_c, targets_c) / self.pos_weight # the sigmoid is integrated to bceloss
+
+            with torch.no_grad():
+                n_gt = targets_c.sum()
+                positives = (nn.Sigmoid()(scores_c) > cutoff)
+                n_p = positives.sum()
+                n_tp = (positives[gt_mask]).sum()
+                recall = float(n_tp) / max(1, int(n_gt))
+                precision = float(n_tp) / max(1, int(n_p))
+                if verbose:
+                    print("nGT", int(n_gt), "recall", int(n_tp), "nP", int(n_p), "loss", float(loss.data))
+            metrics = {"loss": loss, "recall": recall, "precision": precision}
+            return metrics
 
 class PeaknetMSELoss(nn.Module):
     

@@ -28,10 +28,15 @@ def check_existence(exp, run):
 def train(model, device, params, writer):
     model.train()
 
+    print()
+    print("Use indexing: " + str(params["use_indexed_peaks"]))
+    print()
+
     if params["n_classes"] == 3:
+        # outdated
         loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"], device=device).to(device)
     elif params["n_classes"] == 1:
-        loss_func = PeakNetBCE1ChannelLoss(pos_weight=params["pos_weight"], device=device).to(device)
+        loss_func = PeakNetBCE1ChannelLoss(pos_weight=params["pos_weight"], device=device, use_indexed_peaks=params["use_indexed_peaks"]).to(device)
     else:
         print("Unrecognized number of classes for loss function.")
         return
@@ -73,7 +78,7 @@ def train(model, device, params, writer):
             print("[{:}] exp: {}  run: {}\ncxi: {}".format(i, exp, run, cxi_path))
             print("*********************************************************************")
             psana_images = PSANAImage(cxi_path, exp, run, downsample=params["downsample"], n=params["n_per_run"],
-                                      min_det_peaks=params["min_det_peaks"])
+                                      min_det_peaks=params["min_det_peaks"], use_indexed_peaks=params["use_indexed_peaks"])
             data_loader = DataLoader(psana_images, batch_size=params["batch_size"], shuffle=True, drop_last=True,
                                      num_workers=params["num_workers"])
             for j, (x, y, n_trials) in enumerate(data_loader):
@@ -114,7 +119,8 @@ def train(model, device, params, writer):
                     if seen % (params["backup_every"]) == 0:
                         torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                     if seen % params["show_image_every"] == 0:
-                        visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model)
+                        visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device,
+                                                           model, use_indexed_peaks=params["use_indexed_peaks"])
                         visualize.show_weights_model(writer, model)
             psana_images.close()
     saver.save(params["save_name"])
@@ -148,6 +154,7 @@ def parse_args():
     p.add_argument("--upload_every", type=int, default=10)
     p.add_argument("--min_det_peaks", type=int, default=0)
     p.add_argument("--n_epochs", type=int, default=50)
+    p.add_argument("--use_indexed_peaks", type=str, default="True")
     return p.parse_args()
 
 def load_model(params):
@@ -194,6 +201,10 @@ def main():
     params["upload_every"] = args.upload_every
     params["min_det_peaks"] = args.min_det_peaks
     params["n_epochs"] = args.n_epochs
+    if args.use_indexed_peaks == "True":
+        params["use_indexed_peaks"] = True
+    else:
+        params["use_indexed_peaks"] = False
 
     model = model.to(device)
 

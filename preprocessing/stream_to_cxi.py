@@ -131,7 +131,7 @@ def main():
         Panel = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
 
         for idx_list in range(args.events_per_cxi):
-            print("List " + str(idx_list))
+            # print("List " + str(idx_list))
             idx_stream = idx_cxi * args.events_per_cxi + idx_list
 
             event_number = get_event_number(extract, idx_stream)
