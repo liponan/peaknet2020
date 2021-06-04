@@ -28,9 +28,9 @@ def check_existence(exp, run):
 def train(model, device, params, writer):
     model.train()
 
-    print()
+    print("")
     print("Use indexing: " + str(params["use_indexed_peaks"]))
-    print()
+    print("")
 
     if params["n_classes"] == 3:
         # outdated
