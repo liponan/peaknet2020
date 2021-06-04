@@ -166,6 +166,7 @@ def main():
             panel_array_indexing[:nIndexedPeaks] = np.array(panel_list_indexing)
             print(fs_array_indexing.shape)
             print(fs_array_indexing[:])
+            print(XPos.shape)
             XPos[idx_list] = fs_array_indexing[:]
             YPos[idx_list] = ss_array_indexing[:]
             Panel[idx_list] = panel_array_indexing[:]
@@ -180,6 +181,7 @@ def main():
         result_1.create_dataset('peakYPosRaw', data=peakYPosRaw)
         nIndexedPeaks_array = np.array(nIndexedPeaks_list)
         indexing.create_dataset('nIndexedPeaks', data=nIndexedPeaks_array)
+        print(XPos.shape)
         print(XPos)
         indexing.create_dataset('XPos', data=XPos)
         indexing.create_dataset('YPos', data=YPos)
