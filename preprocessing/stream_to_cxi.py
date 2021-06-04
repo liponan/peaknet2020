@@ -79,8 +79,8 @@ def main():
         event_numbers = []
         LCLS = cxi_file.create_group('LCLS')
         nPeaks_list = []
-        peak2 = np.array((args.events_per_cxi, max_n_peaks), dtype=float)
-        peak1 = np.array((args.events_per_cxi, max_n_peaks), dtype=float)
+        peak2 = np.zeros((args.events_per_cxi, max_n_peaks), dtype=float)
+        peak1 = np.zeros((args.events_per_cxi, max_n_peaks), dtype=float)
         result_1 = cxi_file.create_group('entry_1/result_1')
 
         for idx_list in range(args.events_per_cxi):
@@ -98,9 +98,6 @@ def main():
             fs_array[:nPeaks] = np.array(fs_list)
             ss_array = np.zeros((max_n_peaks), dtype=float)
             ss_array[:nPeaks] = np.array(ss_list)
-            print(fs_array)
-            print(fs_array.shape)
-            print(peak2.shape)
             peak2[idx_list] = fs_array[:]
             peak1[idx_list] = ss_array[:]
             #
