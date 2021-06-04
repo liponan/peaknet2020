@@ -54,7 +54,6 @@ def train(model, device, params, writer):
                                   n=params["n_per_run"], min_det_peaks=params["min_det_peaks"])
 
     idx_event_visualization = len(psana_images_vis) // 2
-    # print("idx_event_visualization: "+str(idx_event_visualization))
     img_vis, target_vis, _ = psana_images_vis[idx_event_visualization]
 
     total_steps = 0
@@ -78,7 +77,8 @@ def train(model, device, params, writer):
             print("[{:}] exp: {}  run: {}\ncxi: {}".format(i, exp, run, cxi_path))
             print("*********************************************************************")
             psana_images = PSANAImage(cxi_path, exp, run, downsample=params["downsample"], n=params["n_per_run"],
-                                      min_det_peaks=params["min_det_peaks"], use_indexed_peaks=params["use_indexed_peaks"])
+                                      min_det_peaks=params["min_det_peaks"], use_indexed_peaks=params["use_indexed_peaks"],
+                                      n_classes = params["n_classes"])
             data_loader = DataLoader(psana_images, batch_size=params["batch_size"], shuffle=True, drop_last=True,
                                      num_workers=params["num_workers"])
             for j, (x, y, n_trials) in enumerate(data_loader):
@@ -88,18 +88,10 @@ def train(model, device, params, writer):
                 seen += n
                 seen_and_missed += n_trials.sum().item()
                 h, w = x.size(2), x.size(3)
-                print(y.shape)
-                if params["n_classes"] == 1:
-                    if params["use_indexed_peaks"]:
-                        y = y[:, :, [0, 3], :, :]  # remove useless channels
-                        y = y.view(-1, 2, h, w)
-                    else:
-                        y = y[:, :, 0:1, :, :]  # remove useless channels
-                        y = y.view(-1, 1, h, w)
+                channels = y.size(2)
+                y = y.view(-1, channels, h, w)
                 x = x.to(device)
                 y = y.to(device)
-                print("nPeaks: "+str(len(y[:, 0, :, :] > 0.5)))
-                print("nIndexedPeaks: " + str(len(y[:, 1, :, :] > 0.5)))
 
                 scores = model(x)
                 metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
