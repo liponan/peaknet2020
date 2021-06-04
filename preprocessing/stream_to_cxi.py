@@ -178,6 +178,7 @@ def main():
         result_1.create_dataset('peakYPosRaw', data=peakYPosRaw)
         nIndexedPeaks_array = np.array(nIndexedPeaks_list)
         indexing.create_dataset('nIndexedPeaks', data=nIndexedPeaks_array)
+        print(XPos)
         indexing.create_dataset('XPos', data=XPos)
         indexing.create_dataset('YPos', data=YPos)
         indexing.create_dataset('panel', data=Panel)
