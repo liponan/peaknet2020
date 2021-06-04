@@ -90,7 +90,10 @@ def train(model, device, params, writer):
                 h, w = x.size(2), x.size(3)
                 x = x.to(device)
                 y = y.to(device)
-                y = y.view(-1, 3, h, w).to(device)
+                if params["use_indexed_peaks"]:
+                    y = y.view(-1, 6, h, w).to(device)
+                else:
+                    y = y.view(-1, 3, h, w).to(device)
 
                 scores = model(x)
                 metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])
