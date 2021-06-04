@@ -6,13 +6,13 @@ import os
 import shutil
 
 def get_event_number(extract, idx_stream):
-    event_number_pos = extract.label.index[idx_stream][1]
+    event_number_pos = extract.label.index[idx_stream][2]
     line = extract.content[event_number_pos]
     id = int(line.split()[1].split('/')[2])
     return id
 
 def get_nPeaks(extract, idx_stream):
-    nPeaks_pos = extract.label.index[idx_stream][2]
+    nPeaks_pos = extract.label.index[idx_stream][2] + 11
     line = extract.content[nPeaks_pos]
     nPeaks = int(line.split()[2])
     return nPeaks
