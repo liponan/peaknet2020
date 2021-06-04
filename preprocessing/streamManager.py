@@ -19,6 +19,7 @@ class iLabel:
         self.id = ['----- Begin chunk -----',
                    'Image filename:',
                    'Event: //',
+                   'num_peaks',
                    'Peaks from peak search',
                    'End of peak list',
                    '--- Begin crystal',
