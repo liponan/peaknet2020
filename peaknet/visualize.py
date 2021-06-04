@@ -59,9 +59,6 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         # GT indexing
         if use_indexed_peaks:
             indices_nonzero = np.array(np.nonzero(target_vis[i, 1]))
-            print("Panel "+str(i))
-            print(len(indices_nonzero))
-            print(indices_nonzero)
             if params["n_classes"] == 1:
                 plt.plot(indices_nonzero[:, 1] - .5,
                          indices_nonzero[:, 0] - .5,
