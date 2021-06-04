@@ -60,6 +60,7 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         if use_indexed_peaks:
             indices_nonzero = np.array(np.nonzero(target_vis[i, 1]))
             if params["n_classes"] == 1:
+                print("PLOT")
                 plt.plot(indices_nonzero[:, 1] - .5,
                          indices_nonzero[:, 0] - .5,
                          'mo', markerfacecolor='none', markersize=10, markeredgewidth=2.0, alpha=.8)
