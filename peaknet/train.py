@@ -88,12 +88,14 @@ def train(model, device, params, writer):
                 seen += n
                 seen_and_missed += n_trials.sum().item()
                 h, w = x.size(2), x.size(3)
+                if params["n_classes"] == 1:
+                    y = y[:, :, [0, 3], :, :] # remove useless channels
+                    if params["use_indexed_peaks"]:
+                        y = y.view(-1, 2, h, w).to(device)
+                    else:
+                        y = y.view(-1, 1, h, w).to(device)
                 x = x.to(device)
                 y = y.to(device)
-                if params["use_indexed_peaks"]:
-                    y = y.view(-1, 6, h, w).to(device)
-                else:
-                    y = y.view(-1, 3, h, w).to(device)
 
                 scores = model(x)
                 metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])

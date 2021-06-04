@@ -67,7 +67,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
     def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
         if self.use_indexed_peaks:
             peak_finding = targets[:, 0, :, :].reshape(-1)
-            indexing = self.maxpool(targets)[:, 3, :, :].reshape(-1)
+            indexing = self.maxpool(targets)[:, 1, :, :].reshape(-1)
             peak_finding_mask = peak_finding
             indexing_mask = indexing
             rejected_mask = (peak_finding_mask + indexing_mask) % 2 # A XOR B

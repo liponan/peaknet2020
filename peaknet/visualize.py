@@ -58,14 +58,8 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
 
         # GT indexing
         if use_indexed_peaks:
-            indices_nonzero = np.array(np.nonzero(target_vis[i, 3]))
-            if params["n_classes"] == 3:
-                shift_u = target_vis[i, 1, indices_nonzero[:, 0], indices_nonzero[:, 1]].numpy()
-                shift_v = target_vis[i, 2, indices_nonzero[:, 0], indices_nonzero[:, 1]].numpy()
-                plt.plot(indices_nonzero[:, 1] - .5 + shift_v,
-                         indices_nonzero[:, 0] - .5 + shift_u,
-                         'mo', markerfacecolor='none', markersize=10, markeredgewidth=2.0, alpha=.8)
-            elif params["n_classes"] == 1:
+            indices_nonzero = np.array(np.nonzero(target_vis[i, 1]))
+            if params["n_classes"] == 1:
                 plt.plot(indices_nonzero[:, 1] - .5,
                          indices_nonzero[:, 0] - .5,
                          'mo', markerfacecolor='none', markersize=10, markeredgewidth=2.0, alpha=.8)
