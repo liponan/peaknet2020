@@ -96,8 +96,8 @@ def main():
             fs_array[:nPeaks] = np.array(fs_list)
             ss_array = np.zeros((max_n_peaks), dtype=float)
             ss_array[:nPeaks] = np.array(ss_list)
-            peak2[idx_list] = fs_array
-            peak1[idx_list] = ss_array
+            peak2[idx_list] = fs_array[:]
+            peak1[idx_list] = ss_array[:]
             #
         event_numbers = np.array(event_numbers)
         LCLS.create_dataset('eventNumber', data=event_numbers)
