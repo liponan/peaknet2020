@@ -113,7 +113,7 @@ class PSANAImage(Dataset):
             img_tensor = torch.zeros(img.shape[0], h_pad, w_pad)
             img_tensor[:, 0:img.shape[1], 0:img.shape[2]] = torch.from_numpy(img)
             if self.use_indexed_peaks:
-                label_tensor = self.make_label_with_indexing(s, r, c, s_idxg, r_idxg, c_idxg, n_panels=img.shape[0], h=h_ds, w=w_ds)
+                label_tensor = self.make_label_with_idxg(s, r, c, s_idxg, r_idxg, c_idxg, n_panels=img.shape[0], h=h_ds, w=w_ds)
             else:
                 label_tensor = self.make_label(s, r, c, n_panels=img.shape[0], h=h_ds, w=w_ds)
             n_trials_tensor = torch.zeros(1)
