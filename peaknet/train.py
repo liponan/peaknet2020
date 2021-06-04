@@ -146,7 +146,7 @@ def parse_args():
     p.add_argument("--backup_every", type=int, default=500)
     p.add_argument("--print_every", type=int, default=25)
     p.add_argument("--upload_every", type=int, default=10)
-    p.add_argument("--min_det_peaks", type=int, default=50)
+    p.add_argument("--min_det_peaks", type=int, default=0)
     p.add_argument("--n_epochs", type=int, default=50)
     return p.parse_args()
 

@@ -1,7 +1,6 @@
-import os,sys
 import numpy as np
 from pprint import pprint
-from streamManager import iStream
+from preprocessing.streamManager import iStream
 
 
 #path_stream = "/reg/data/ana03/scratch/zhensu/share/axel/test.stream"

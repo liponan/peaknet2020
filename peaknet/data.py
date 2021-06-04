@@ -158,7 +158,7 @@ class CXILabel(Dataset):
             + 8 * np.floor_divide(self.peak_x_label[idx, 0:my_npeaks], 388)
         my_r = np.fmod(self.peak_y_center[idx, 0:my_npeaks], 185.0)
         my_c = np.fmod(self.peak_x_center[idx, 0:my_npeaks], 388.0)
-        return my_event_idx, my_s, my_r, my_c # what is this?
+        return my_event_idx, my_s, my_r, my_c
         # psocake style
 #         my_r = self.peak_y_center[idx,0:my_npeaks]
 #         my_c = self.peak_x_center[idx,0:my_npeaks]
