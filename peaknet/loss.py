@@ -75,7 +75,8 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             exclusion_mask = (1 - peak_finding_mask) * (1 - indexing_mask) # not A and not B
             union_mask = peak_finding_mask + indexing_mask - intersection_mask
             scores_filtered = scores[:, 0, :, :].reshape(-1)
-            scores_filtered[rejected_mask > 0.5] = -float("Inf")
+            # scores_filtered[rejected_mask > 0.5] = -float("Inf")
+            scores_filtered[rejected_mask > 0.5] = 0
 
             pos_weight = self.pos_weight * exclusion_mask.sum().double() / intersection_mask.sum().double()
             self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
@@ -91,7 +92,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                 n_tp_prec = (positives * union_mask).sum()
                 recall = float(n_tp_recall) / max(1, int(n_pos_gt))
                 precision = float(n_tp_prec) / max(1, int(n_p))
-            metrics = {"loss": loss, "recall": recall, "precision": precision, "n_pos_gt": n_pos_gt, "n_neg_gt": n_neg_gt}
+            metrics = {"loss": loss, "recall": recall, "precision": precision, "n_pos_gt": n_pos_gt.item(), "n_neg_gt": n_neg_gt.item()}
             return metrics
 
         else:
