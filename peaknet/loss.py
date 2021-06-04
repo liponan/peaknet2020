@@ -68,8 +68,8 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         if self.use_indexed_peaks:
             peak_finding = targets[:, 0, :, :].reshape(-1)
             indexing = self.maxpool(targets)[:, 3, :, :].reshape(-1)
-            peak_finding_mask = peak_finding > 0.5
-            indexing_mask = indexing > 0.5
+            peak_finding_mask = peak_finding
+            indexing_mask = indexing
             rejected_mask = (peak_finding_mask + indexing_mask) % 2 # A XOR B
             intersection_mask = peak_finding_mask * indexing_mask # A and B
             exclusion_mask = (1 - peak_finding_mask) * (1 - indexing_mask) # not A and not B
