@@ -70,7 +70,7 @@ class PSANAImage(Dataset):
     def make_label_with_idxg(self, s, r, c, s_idxg, r_idxg, c_idxg, n_panels=32, h=24, w=49):
         label = torch.zeros(n_panels, 6, h, w)
         label_peaks_only = self.make_label(s, r, c, n_panels=n_panels, h=h, w=w)
-        label_idxg_only = self.make_labels(s_idxg, r_idxg, c_idxg, n_panels=n_panels, h=h, w=w)
+        label_idxg_only = self.make_label(s_idxg, r_idxg, c_idxg, n_panels=n_panels, h=h, w=w)
         label[:, :3, :, :] = label_peaks_only
         label[:, 3:, :, :] = label_idxg_only
         return label
