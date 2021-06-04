@@ -67,7 +67,7 @@ def get_fs_ss_panel(extract, idx_stream, nIndexedPeaks):
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--filename", "-f", type=str, required=True, help="Path to .stream file")
-    p.add_argument("--events_per_cxi", type=int, default=10, help="Number of events per .cxi file")
+    p.add_argument("--events_per_cxi", type=int, default=1, help="Number of events per .cxi file")
     p.add_argument("--max_n_peaks", type=int, default=2048, help="Maximum number of peaks (for peak finding)")
     p.add_argument("--max_n_indexed_peaks", type=int, default=2048, help="Maximum number of peaks (for indexing)")
     p.add_argument("--default_detector", type=str, default="CxiDs1.0:Cspad.0", help="Default detector type")
@@ -158,13 +158,14 @@ def main():
                 nIndexedPeaks = max_n_indexed_peaks
             nIndexedPeaks_list.append(nIndexedPeaks)
             fs_list_indexing, ss_list_indexing, panel_list_indexing = get_fs_ss_panel(extract, idx_stream, nIndexedPeaks)
-            print(fs_list_indexing)
             fs_array_indexing = np.zeros((max_n_indexed_peaks), dtype=float)
             fs_array_indexing[:nIndexedPeaks] = np.array(fs_list_indexing)
             ss_array_indexing = np.zeros((max_n_indexed_peaks), dtype=float)
             ss_array_indexing[:nIndexedPeaks] = np.array(ss_list_indexing)
             panel_array_indexing = np.zeros((max_n_indexed_peaks), dtype=int)
             panel_array_indexing[:nIndexedPeaks] = np.array(panel_list_indexing)
+            print(fs_array_indexing.shape)
+            print(fs_array_indexing[:])
             XPos[idx_list] = fs_array_indexing[:]
             YPos[idx_list] = ss_array_indexing[:]
             Panel[idx_list] = panel_array_indexing[:]
