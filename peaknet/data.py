@@ -123,6 +123,8 @@ class PSANAImage(Dataset):
             if self.n_classes == 1:
                 if self.use_indexed_peaks:
                     label_tensor = label_tensor[:, [0, 3], :, :]
+                    print("nPeaks: " + str(len(np.nonzeros(label_tensor[:, 0, :, :]))))
+                    print("nIndexedPeaks: " + str(len(np.nonzeros(label_tensor[:, 1, :, :]))))
                 else:
                     label_tensor = label_tensor[:, 0:1, :, :]
             return img_tensor, label_tensor, n_trials_tensor
