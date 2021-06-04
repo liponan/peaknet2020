@@ -52,12 +52,13 @@ def train(model, device, params, writer):
     idx_experiment_visualization = 0
     cxi_path_vis, exp_vis, run_vis = train_dataset[idx_experiment_visualization]
     psana_images_vis = PSANAImage(cxi_path_vis, exp_vis, run_vis, downsample=params["downsample"],
-                                  n=params["n_per_run"], min_det_peaks=params["min_det_peaks"])
-
+                                  n=params["n_per_run"], min_det_peaks=params["min_det_peaks"],
+                                  use_indexed_peaks=params["use_indexed_peaks"],
+                                  n_classes = params["n_classes"])
     idx_event_visualization = len(psana_images_vis) // 2
     img_vis, target_vis, _ = psana_images_vis[idx_event_visualization]
-    print("nPeaks: " + str(len(np.nonzero(target_vis[:, 0, :, :]))))
-    print("nIndexedPeaks: " + str(len(np.nonzero(target_vis[:, 1, :, :]))))
+    print("nPeaks visualization: " + str(len(np.nonzero(target_vis[:, 0, :, :]))))
+    print("nIndexedPeaks visualization: " + str(len(np.nonzero(target_vis[:, 1, :, :]))))
 
     total_steps = 0
     seen = 0
