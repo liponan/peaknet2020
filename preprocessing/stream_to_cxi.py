@@ -6,19 +6,19 @@ import os
 import shutil
 
 def get_event_number(extract, idx_stream):
-    event_number_pos = extract.label.index[idx_stream][2]
+    event_number_pos = extract.label.index[idx_stream][1]
     line = extract.content[event_number_pos]
     id = int(line.split()[1].split('/')[2])
     return id
 
 def get_nPeaks(extract, idx_stream):
-    nPeaks_pos = extract.label.index[idx_stream][3]
+    nPeaks_pos = extract.label.index[idx_stream][2]
     line = extract.content[nPeaks_pos]
     nPeaks = int(line.split()[2])
     return nPeaks
 
 def get_fs_ss_XPos_YPos(extract, idx_stream, nPeaks):
-    peak_pos_0 = extract.label.index[idx_stream][4] + 2
+    peak_pos_0 = extract.label.index[idx_stream][3] + 2
     fs_list = []
     ss_list = []
     XPos = []

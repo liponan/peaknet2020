@@ -17,7 +17,6 @@ class iLabel:
         self.level = [1, 1, 1, 1, 2, 1, 2, 2, 2, 1]
         self.map = [-1 if x == 1 else idx - 1 - self.level[:idx][::-1].index(x - 1) for idx, x in enumerate(self.level)]
         self.id = ['----- Begin chunk -----',
-                   'Image filename:',
                    'Event: //',
                    'num_peaks',
                    'Peaks from peak search',
