@@ -18,7 +18,7 @@ def get_nPeaks(extract, idx_stream):
     return nPeaks
 
 def get_fs_ss(extract, idx_stream, nPeaks):
-    peak_pos_0 = extract.label.index[idx_stream][3] + 1
+    peak_pos_0 = extract.label.index[idx_stream][3] + 2
     fs_list = []
     ss_list = []
     for k in range(nPeaks):
