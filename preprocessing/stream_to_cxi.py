@@ -53,6 +53,8 @@ def main():
         if val == 'y':
             shutil.rmtree(save_dir)
             print("Directory removed.")
+        else:
+            return
 
     os.makedirs(save_dir)
 
@@ -96,6 +98,9 @@ def main():
             fs_array[:nPeaks] = np.array(fs_list)
             ss_array = np.zeros((max_n_peaks), dtype=float)
             ss_array[:nPeaks] = np.array(ss_list)
+            print(fs_array)
+            print(fs_array.shape)
+            print(peak2.shape)
             peak2[idx_list] = fs_array[:]
             peak1[idx_list] = ss_array[:]
             #
