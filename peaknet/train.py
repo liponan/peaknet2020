@@ -97,6 +97,8 @@ def train(model, device, params, writer):
                         y = y.view(-1, 1, h, w)
                 x = x.to(device)
                 y = y.to(device)
+                print("nPeaks: "+str(len(y[:, 0, :, :] > 0.5)))
+                print("nIndexedPeaks: " + str(len(y[:, 1, :, :] > 0.5)))
 
                 scores = model(x)
                 metrics = loss_func(scores, y, verbose=params["verbose"], cutoff=params["cutoff"])

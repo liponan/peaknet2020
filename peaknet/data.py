@@ -173,7 +173,6 @@ class CXILabel(Dataset):
         
     def __getitem__(self, idx):
         my_npeaks = self.nPeaks[idx]
-        print("nPeaks: "+str(my_npeaks))
         my_event_idx = self.eventIdx[idx]
         # psana style
         my_s = np.floor_divide(self.peak_y_label[idx, 0:my_npeaks], 185) \
@@ -182,7 +181,6 @@ class CXILabel(Dataset):
         my_c = np.fmod(self.peak_x_center[idx, 0:my_npeaks], 388.0)
         if self.use_indexed_peaks:
             my_nIndexedPeaks = self.nIndexedPeaks[idx]
-            print("nIndexedPeaks: " + str(my_nIndexedPeaks))
             my_s_indexing = self.indexing_panel[idx, 0:my_nIndexedPeaks].astype(np.int32)
             my_r_indexing = np.fmod(self.indexing_y_center[idx, 0:my_nIndexedPeaks], 185.0)
             my_c_indexing = np.fmod(self.indexing_x_center[idx, 0:my_nIndexedPeaks], 388.0)
