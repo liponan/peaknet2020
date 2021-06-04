@@ -18,6 +18,7 @@ import visualize
 import shutil
 import argparse
 import time
+import numpy as np
 
 
 def check_existence(exp, run):
@@ -55,6 +56,8 @@ def train(model, device, params, writer):
 
     idx_event_visualization = len(psana_images_vis) // 2
     img_vis, target_vis, _ = psana_images_vis[idx_event_visualization]
+    print("nPeaks: " + str(len(np.nonzero(target_vis[:, 0, :, :]))))
+    print("nIndexedPeaks: " + str(len(np.nonzero(target_vis[:, 1, :, :]))))
 
     total_steps = 0
     seen = 0
@@ -147,7 +150,7 @@ def parse_args():
     p.add_argument("--n_per_run", type=int, default=50000)
     p.add_argument('--confirm_delete', dest='confirm_delete', action='store_true')
     p.add_argument('--no_confirm_delete', dest='confirm_delete', action='store_false')
-    p.set_defaults(confirm_delete=True)
+    p.set_defaults(confirm_delete=False)
     p.add_argument("--saver_type", type=str, default=None)
     p.add_argument("--save_name", type=str, default=None)
     p.add_argument("--backup_every", type=int, default=500)
