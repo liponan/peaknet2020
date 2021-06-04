@@ -38,18 +38,45 @@ def get_fs_ss_XPos_YPos(extract, idx_stream, nPeaks):
         YPos.append(185 * (a // 2))  # see CXILabel/__getitem__ in data.py
     return fs_list, ss_list, XPos, YPos
 
+def get_nIndexedPeaks(extract, idx_stream):
+    nIndexedPeaks_pos = extract.label.index[idx_stream][5] + 12
+    line = extract.content[nIndexedPeaks_pos]
+    nIndexedPeaks = int(line.split()[2])
+    return nIndexedPeaks
+
+def get_fs_ss_panel(extract, idx_stream, nIndexedPeaks):
+    peak_pos_0 = extract.label.index[idx_stream][6] + 2
+    fs_list = []
+    ss_list = []
+    panel_list = []
+    for k in range(nIndexedPeaks):
+        peak_pos = peak_pos_0 + k
+        line = extract.content[peak_pos]
+        fs = float(line.split()[7])
+        ss = float(line.split()[8])
+        panel_qa = line.split()[9]
+        qa_list = panel_qa.split('q')[1].split('a')
+        q = int(qa_list[0])
+        a = int(qa_list[1])
+        panel = (a // 2) + 8 * q # see CXILabel/__getitem__ in data.py
+        fs_list.append(fs)
+        ss_list.append(ss)
+        panel_list.append(panel)
+    return fs_list, ss_list, panel_list
 
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--filename", "-f", type=str, required=True, help="Path to .stream file")
     p.add_argument("--events_per_cxi", type=int, default=10, help="Number of events per .cxi file")
-    p.add_argument("--max_n_peaks", type=int, default=2048, help="Maximum number of peaks")
+    p.add_argument("--max_n_peaks", type=int, default=2048, help="Maximum number of peaks (for peak finding)")
+    p.add_argument("--max_n_indexed_peaks", type=int, default=2048, help="Maximum number of peaks (for indexing)")
     p.add_argument("--default_detector", type=str, default="CxiDs1.0:Cspad.0", help="Default detector type")
     return p.parse_args()
 
 def main():
     args = parse_args()
     max_n_peaks = args.max_n_peaks
+    max_n_indexed_peaks = args.max_n_indexed_peaks
 
     print()
     default_detector = args.default_detector
@@ -97,6 +124,11 @@ def main():
         detector_1 = cxi_file.create_group('entry_1/instrument_1/detector_1')
         peakXPosRaw = np.zeros((args.events_per_cxi, max_n_peaks), dtype=float)
         peakYPosRaw = np.zeros((args.events_per_cxi, max_n_peaks), dtype=float)
+        nIndexedPeaks_list = []
+        indexing = cxi_file.create_group('indexing')
+        XPos = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
+        YPos = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
+        Panel = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
 
         for idx_list in range(args.events_per_cxi):
             print("List " + str(idx_list))
@@ -121,7 +153,20 @@ def main():
             YPos_array[:nPeaks] = np.array(YPos)
             peakXPosRaw[idx_list] = XPos_array[:]
             peakYPosRaw[idx_list] = YPos_array[:]
-            #
+            nIndexedPeaks = get_nIndexedPeaks(extract, idx_stream)
+            if nIndexedPeaks > max_n_indexed_peaks:
+                nIndexedPeaks = max_n_indexed_peaks
+            nIndexedPeaks_list.append(nIndexedPeaks)
+            fs_list_indexing, ss_list_indexing, panel_list_indexing = get_fs_ss_panel(extract, idx_stream, nIndexedPeaks)
+            fs_array_indexing = np.zeros((max_n_indexed_peaks), dtype=float)
+            fs_array_indexing[:nIndexedPeaks] = np.array(fs_list_indexing)
+            ss_array_indexing = np.zeros((max_n_indexed_peaks), dtype=float)
+            ss_array_indexing[:nIndexedPeaks] = np.array(ss_list_indexing)
+            panel_array_indexing = np.zeros((max_n_indexed_peaks), dtype=int)
+            panel_array_indexing[:nIndexedPeaks] = np.array(panel_list_indexing)
+            XPos[idx_list] = fs_array_indexing[:]
+            YPos[idx_list] = ss_array_indexing[:]
+            Panel[idx_list] = panel_array_indexing[:]
         event_numbers = np.array(event_numbers)
         LCLS.create_dataset('eventNumber', data=event_numbers)
         nPeaks_array = np.array(nPeaks_list)
@@ -131,14 +176,21 @@ def main():
         detector_1.create_dataset('description', data=default_detector)
         result_1.create_dataset('peakXPosRaw', data=peakXPosRaw)
         result_1.create_dataset('peakYPosRaw', data=peakYPosRaw)
+        nIndexedPeaks_array = np.array(nIndexedPeaks_list)
+        indexing.create_dataset('nIndexedPeaks', data=nIndexedPeaks_array)
+        indexing.create_dataset('XPos', data=XPos)
+        indexing.create_dataset('YPos', data=YPos)
+        indexing.create_dataset('panel', data=Panel)
         cxi_file.close()
-        print("eventNumber:")
-        print(event_numbers)
-        print("nPeaks:")
-        print(nPeaks_array)
+        print('XPos:')
+        print(XPos)
+        print('YPos:')
+        print(YPos)
+        print('panel:')
+        print(Panel)
         print(name_cxi + " closed.")
 
-    print("Done with preprocessing.")
+    print("Preprocessing done.")
 
 if __name__ == "__main__":
     main()
