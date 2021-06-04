@@ -158,6 +158,8 @@ def main():
                 nIndexedPeaks = max_n_indexed_peaks
             nIndexedPeaks_list.append(nIndexedPeaks)
             fs_list_indexing, ss_list_indexing, panel_list_indexing = get_fs_ss_panel(extract, idx_stream, nIndexedPeaks)
+            print(fs_list_indexing)
+            print(fs_list_indexing)
             fs_array_indexing = np.zeros((max_n_indexed_peaks), dtype=float)
             fs_array_indexing[:nIndexedPeaks] = np.array(fs_list_indexing)
             ss_array_indexing = np.zeros((max_n_indexed_peaks), dtype=float)
