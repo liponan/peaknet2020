@@ -126,10 +126,9 @@ def main():
         peakYPosRaw = np.zeros((args.events_per_cxi, max_n_peaks), dtype=float)
         nIndexedPeaks_list = []
         indexing = cxi_file.create_group('indexing')
-        XPos = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
-        YPos = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
+        XPosIdx = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
+        YPosIdx = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
         Panel = np.zeros((args.events_per_cxi, max_n_indexed_peaks), dtype=float)
-        print(XPos.shape)
 
         for idx_list in range(args.events_per_cxi):
             print("List " + str(idx_list))
@@ -165,11 +164,8 @@ def main():
             ss_array_indexing[:nIndexedPeaks] = np.array(ss_list_indexing)
             panel_array_indexing = np.zeros((max_n_indexed_peaks), dtype=int)
             panel_array_indexing[:nIndexedPeaks] = np.array(panel_list_indexing)
-            print(fs_array_indexing.shape)
-            print(fs_array_indexing[:])
-            print(XPos.shape)
-            XPos[idx_list] = fs_array_indexing[:]
-            YPos[idx_list] = ss_array_indexing[:]
+            XPosIdx[idx_list] = fs_array_indexing[:]
+            YPosIdx[idx_list] = ss_array_indexing[:]
             Panel[idx_list] = panel_array_indexing[:]
         event_numbers = np.array(event_numbers)
         LCLS.create_dataset('eventNumber', data=event_numbers)
@@ -182,16 +178,14 @@ def main():
         result_1.create_dataset('peakYPosRaw', data=peakYPosRaw)
         nIndexedPeaks_array = np.array(nIndexedPeaks_list)
         indexing.create_dataset('nIndexedPeaks', data=nIndexedPeaks_array)
-        print(XPos.shape)
-        print(XPos)
-        indexing.create_dataset('XPos', data=XPos)
-        indexing.create_dataset('YPos', data=YPos)
+        indexing.create_dataset('XPos', data=XPosIdx)
+        indexing.create_dataset('YPos', data=YPosIdx)
         indexing.create_dataset('panel', data=Panel)
         cxi_file.close()
         print('XPos:')
-        print(XPos)
+        print(XPosIdx)
         print('YPos:')
-        print(YPos)
+        print(YPosIdx)
         print('panel:')
         print(Panel)
         print(name_cxi + " closed.")
