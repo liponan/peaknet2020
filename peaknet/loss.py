@@ -56,10 +56,10 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         super(PeakNetBCE1ChannelLoss, self).__init__()
         self.use_indexed_peaks = use_indexed_peaks
         if use_indexed_peaks:
-            self.maxpool_idxg = nn.MaxPool2d(7, stride=7, padding=3)
+            self.maxpool_idxg = nn.MaxPool2d(7, stride=1, padding=3)
         self.bceloss = None
         padding = (kernel_MaxPool - 1)//2
-        self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=kernel_MaxPool, padding=padding)
+        self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=1, padding=padding)
         self.pos_weight = torch.Tensor([pos_weight])
         if device is not None:
             self.pos_weight = self.pos_weight.to(device)
