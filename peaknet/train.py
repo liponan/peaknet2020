@@ -56,9 +56,11 @@ def train(model, device, params, writer):
                                   use_indexed_peaks=params["use_indexed_peaks"],
                                   n_classes = params["n_classes"])
     idx_event_visualization = len(psana_images_vis) // 2
+    print("Call")
     img_vis, target_vis, _ = psana_images_vis[idx_event_visualization]
     print("nPeaks visualization: " + str(len(np.nonzero(target_vis[:, 0, :, :]))))
-    print("nIndexedPeaks visualization: " + str(len(np.nonzero(target_vis[:, 1, :, :]))))
+    if params["use_indexed_peaks"]:
+        print("nIndexedPeaks visualization: " + str(len(np.nonzero(target_vis[:, 1, :, :]))))
 
     total_steps = 0
     seen = 0
