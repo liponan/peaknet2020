@@ -9,7 +9,7 @@ def scalar_metrics(writer, metrics, total_steps):
 
 def show_weights_model(writer, model, total_steps):
     print("*** WEIGHTS ***")
-    gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.0.weight'][0, 0]
+    gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.0.weight'][0, 0].cpu().numpy()
     fig = plt.figure(figsize=(5, 5))
     plt.imshow(gen_peak_finding_w, cmap='gray')
     writer.add_figure('Generic Peak Finding Weights', fig, global_step=total_steps)
@@ -17,6 +17,8 @@ def show_weights_model(writer, model, total_steps):
     # print(np_array)
 
 def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model, n=32, use_indexed_peaks=False):
+    print("*** PANELS ***")
+
     center_panels = [0, 1, 8, 9, 16, 17, 24, 25]
     top_left = [4, 5]
 
