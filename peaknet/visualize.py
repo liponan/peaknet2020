@@ -7,9 +7,12 @@ def scalar_metrics(writer, metrics, total_steps):
     for (key, value) in metrics.items():
         writer.add_scalar(key, value, total_steps)
 
-def show_weights_model(writer, model):
+def show_weights_model(writer, model, total_steps):
     print("*** WEIGHTS ***")
-    print(model.state_dict()['gen_peak_finding.0.0.weight'].shape)
+    gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.0.weight'][0, 0]
+    fig = plt.figure(figsize=(5, 5))
+    plt.imshow(gen_peak_finding_w, cmap='gray')
+    writer.add_figure('Generic Peak Finding Weights', fig, global_step=total_steps)
     # np_array = model.state_dict()['ada_filter.weight']
     # print(np_array)
 
