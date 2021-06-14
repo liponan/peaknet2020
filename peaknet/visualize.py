@@ -9,11 +9,10 @@ def scalar_metrics(writer, metrics, total_steps):
 
 def show_weights_model(writer, model, total_steps):
     print("*** WEIGHTS ***")
-    print(model.state_dict()['gen_peak_finding.0.0.weight'].shape)
-    gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.0.weight'][0].cpu().numpy()
+    gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.0.weight'][:, 0].cpu().numpy()
     channels = gen_peak_finding_w.shape[0]
     fig, axs = plt.subplots(4, 4, figsize=(15, 15))
-    for c in range(max(16, channels)):
+    for c in range(min(16, channels)):
         axs[c // 4, c % 4].imshow(gen_peak_finding_w[c], cmap='gray')
     writer.add_figure('Generic Peak Finding Weights', fig, global_step=total_steps)
     # np_array = model.state_dict()['ada_filter.weight']
