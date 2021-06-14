@@ -108,7 +108,7 @@ class PSANAImage(Dataset):
             # img = img - np.mean(img)
             for i in range(img.shape[0]):
                 img[i] = img[i] / np.max(img[i])
-                # img[i][img[i] == 0] = np.mean(img[i])
+                img[i][img[i] == 0] = np.mean(img[i])
         h_ds = int(np.ceil(img.shape[1] / float(self.downsample)))
         w_ds = int(np.ceil(img.shape[2] / float(self.downsample)))
         h_pad = int(h_ds * self.downsample)

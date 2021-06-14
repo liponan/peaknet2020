@@ -11,7 +11,7 @@ def show_weights_model(writer, model, total_steps):
     print("*** WEIGHTS ***")
     gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.0.weight'][:, 0].cpu().numpy()
     channels = gen_peak_finding_w.shape[0]
-    fig, axs = plt.subplots(2, 4, figsize=(5, 10))
+    fig, axs = plt.subplots(2, 4, figsize=(10, 5))
     for c in range(min(8, channels)):
         axs[c // 4, c % 4].imshow(gen_peak_finding_w[c], cmap='gray')
     writer.add_figure('Generic Peak Finding Weights', fig, global_step=total_steps)
