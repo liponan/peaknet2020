@@ -127,7 +127,7 @@ def train(model, device, params, writer):
                     if seen % params["show_image_every"] == 0:
                         visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device,
                                                            model, use_indexed_peaks=params["use_indexed_peaks"])
-                        visualize.show_weights_model(writer, model, total_steps)
+                        # visualize.show_weights_model(writer, model, total_steps)
             psana_images.close()
     saver.save(params["save_name"])
     torch.save(model, "debug/"+params["experiment_name"]+"/model.pt")
