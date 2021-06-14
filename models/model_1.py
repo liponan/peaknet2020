@@ -6,7 +6,7 @@ class AdaFilter_1(nn.Module):
     def __init__(self, params=None):
         super(AdaFilter_1, self).__init__()
 
-        padding_mode = 'zeros'
+        padding_mode = 'reflect'
 
         k_ada_filter_1 = 1
         in_ada_filter = 32
@@ -35,8 +35,11 @@ class AdaFilter_1(nn.Module):
                                         nn.BatchNorm2d(out_ada_filter),
                                         nn.ReLU())
 
-        k_list = [3, 3, 3]
-        in_list = [1, 6, 1]
+        # k_list = [3, 3, 3]
+        # in_list = [1, 6, 1]
+        # out_last = [1]
+        k_list = [7]
+        in_list = [6]
         out_last = [1]
 
         out_list = in_list[1:] + out_last
