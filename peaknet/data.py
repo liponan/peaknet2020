@@ -190,8 +190,14 @@ class CXILabel(Dataset):
         # Test consistency
         print(idx)
         print(my_event_idx)
-        print("np.argwhere(self.eventIdx_test == my_event_idx)")
-        print(np.argwhere(self.eventIdx_test == my_event_idx))
+        print(my_npeaks)
+        print("")
+        idx_test = np.argwhere(self.eventIdx_test == my_event_idx)[0,0]
+        my_npeaks_test = self.nPeaks_test[idx_test]
+        my_event_idx_test = self.eventIdx_test[idx_test]
+        print(idx_test)
+        print(my_event_idx_test)
+        print(my_npeaks_test)
         time.sleep(5)
         # psana style
         my_s = np.floor_divide(self.peak_y_label[idx, 0:my_npeaks], 185) \
