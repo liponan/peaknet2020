@@ -9,7 +9,7 @@ def scalar_metrics(writer, metrics, total_steps):
 
 def show_weights_model(writer, model, total_steps):
     print("*** WEIGHTS ***")
-    gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.0.weight'][:, 0].cpu().numpy()
+    gen_peak_finding_w = model.state_dict()['gen_peak_finding.1.0.weight'][:, 0].cpu().numpy()
     channels = gen_peak_finding_w.shape[0]
     fig, axs = plt.subplots(2, 4, figsize=(10, 5))
     for c in range(min(8, channels)):
