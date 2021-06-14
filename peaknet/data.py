@@ -104,9 +104,9 @@ class PSANAImage(Dataset):
         img = self.psana.load_img(event_idx)
         img[img < 0] = 0
         if self.normalize:
-            img = img / max(0.01, np.std(img)) # why max 0.01?
-            img = img - np.mean(img)
-            # img = img / max(np.max(img), self.max_cutoff)
+            # img = img / max(0.01, np.std(img)) # why max 0.01?
+            # img = img - np.mean(img)
+            img = img / np.max(img)
         h_ds = int(np.ceil(img.shape[1] / float(self.downsample)))
         w_ds = int(np.ceil(img.shape[2] / float(self.downsample)))
         h_pad = int(h_ds * self.downsample)
