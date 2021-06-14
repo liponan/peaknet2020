@@ -9,6 +9,7 @@ def scalar_metrics(writer, metrics, total_steps):
 
 def show_weights_model(writer, model):
     print("*** WEIGHTS ***")
+    print(model.state_dict().keys)
     # np_array = model.state_dict()['ada_filter.weight']
     # print(np_array)
 

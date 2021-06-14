@@ -32,7 +32,7 @@ class AdaFilter_1(nn.Module):
                                                   groups=groups_ada_filter,
                                                   bias=False)
         self.ada_filter = nn.Sequential(conv) # input in [0, 1]
-        torch.nn.init.xavier_uniform(conv.weight)
+        torch.nn.init.xavier_uniform_(conv.weight)
 
         # k_list = [3, 3, 3]
         # in_list = [1, 6, 1]
@@ -48,13 +48,13 @@ class AdaFilter_1(nn.Module):
             conv_list.append(nn.Sequential(conv,
                                            nn.BatchNorm2d(out_list[i]),
                                            nn.Tanh())) # symmetric output
-            torch.nn.init.xavier_uniform(conv.weight)
+            torch.nn.init.xavier_uniform_(conv.weight)
         self.gen_peak_finding = nn.Sequential(*conv_list)
 
         k_out = 1
         pad_out = (k_out - 1) // 2
         conv_out = nn.Conv2d(32, 32, k_out, padding=pad_out, padding_mode=padding_mode, groups=32)
-        torch.nn.init.xavier_uniform(conv_out.weight)
+        torch.nn.init.xavier_uniform_(conv_out.weight)
         self.conv_out = conv_out
 
     def forward(self, x):
