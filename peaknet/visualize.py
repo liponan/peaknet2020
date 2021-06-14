@@ -13,7 +13,10 @@ def show_weights_model(writer, model):
     # print(np_array)
 
 def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model, n=32, use_indexed_peaks=False):
-    for i in range(n):
+    center_panels = [0, 1, 8, 9, 16, 17, 24, 25]
+    top_left = [4, 5]
+
+    for i in center_panels + top_left:
         panel_name = 'panel_'+str(i)
 
         fig = plt.figure(figsize=(10,10))

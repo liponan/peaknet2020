@@ -39,8 +39,8 @@ class AdaFilter_1(nn.Module):
         # out_last = [1]
         k_list = [7]
         in_list = [1]
-        out_list = in_list[1:] + [6]
 
+        out_list = in_list[1:] + [1]
         pad_list = [(k - 1) // 2 for k in k_list]
         conv_list = []
         for i in range(len(k_list)):
@@ -49,17 +49,20 @@ class AdaFilter_1(nn.Module):
                                            nn.BatchNorm2d(out_list[i]),
                                            nn.Tanh())) # symmetric output
             torch.nn.init.xavier_uniform(conv.weight)
+        self.gen_peak_finding = nn.Sequential(*conv_list)
 
         k_out = 1
         pad_out = (k_out - 1) // 2
-        conv_out = nn.Conv2d(out_list[-1], 1, k_out, padding=pad_out, padding_mode=padding_mode)
-        conv_list.append(conv_out)
+        conv_out = nn.Conv2d(32, 32, k_out, padding=pad_out, padding_mode=padding_mode, groups=32)
         torch.nn.init.xavier_uniform(conv_out.weight)
-        self.gen_peak_finding = nn.Sequential(*conv_list)
+        self.conv_out = conv_out
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
         filtered_x = self.ada_filter(x)
         filtered_x = filtered_x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
-        return logits
+        panel_logits = logits.view(-1 , 32, h, w)
+        panel_logits = self.conv_out(panel_logits)
+        logits_out = panel_logits.view(-1, 1, h, w)
+        return logits_out
