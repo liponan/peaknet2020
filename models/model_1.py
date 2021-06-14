@@ -6,7 +6,7 @@ class AdaFilter_1(nn.Module):
     def __init__(self, params=None):
         super(AdaFilter_1, self).__init__()
 
-        padding_mode = 'circular'
+        padding_mode = 'zeros'
 
         k_ada_filter_1 = 1
         in_ada_filter = 32
