@@ -37,7 +37,7 @@ class AdaFilter_1(nn.Module):
         # k_list = [3, 3, 3]
         # in_list = [1, 6, 1]
         # out_last = [1]
-        k_list = [7, 1]
+        k_list = [5, 5]
         in_list = [1, 6]
 
         out_list = in_list[1:] + [1]
