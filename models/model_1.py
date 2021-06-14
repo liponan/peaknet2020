@@ -27,7 +27,7 @@ class AdaFilter_1(nn.Module):
         #                                    groups=groups_ada_filter)
         # self.ada_filter = nn.Sequential(conv_ada_filter_1, conv_ada_filter_2)
         conv = nn.Conv2d(in_ada_filter, out_ada_filter, k_ada_filter_1,
-                                                  padding=pad_ada_filter_1,
+                                                  padding=0,
                                                   padding_mode=padding_mode,
                                                   groups=groups_ada_filter,
                                                   bias=False)
@@ -44,8 +44,9 @@ class AdaFilter_1(nn.Module):
         pad_list = [(k - 1) // 2 for k in k_list]
         conv_list = []
         for i in range(len(k_list)):
-            conv = nn.Conv2d(in_list[i], out_list[i], k_list[i], padding=pad_list[i], padding_mode=padding_mode)
-            conv_list.append(nn.Sequential(conv,
+            conv = nn.Conv2d(in_list[i], out_list[i], k_list[i], padding=0, padding_mode=padding_mode)
+            conv_list.append(nn.Sequential(nn.ReflectionPad2d(pad_list[i]),
+                                           conv,
                                            nn.BatchNorm2d(out_list[i]),
                                            nn.Tanh())) # symmetric output
             torch.nn.init.xavier_uniform_(conv.weight)
@@ -53,7 +54,7 @@ class AdaFilter_1(nn.Module):
 
         k_out = 1
         pad_out = (k_out - 1) // 2
-        conv_out = nn.Conv2d(32, 32, k_out, padding=pad_out, padding_mode=padding_mode, groups=32)
+        conv_out = nn.Conv2d(32, 32, k_out, padding=0, padding_mode=padding_mode, groups=32)
         torch.nn.init.xavier_uniform_(conv_out.weight)
         self.conv_out = conv_out
 
