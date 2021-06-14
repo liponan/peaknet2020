@@ -111,8 +111,10 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                 positives = (nn.Sigmoid()(scores_c) > cutoff)
                 n_p = positives.sum()
                 n_tp = (positives[gt_mask]).sum()
+                gt_mask_prec = self.maxpool(targets)[:, 0, :, :].reshape(-1) > 0.5
+                n_tp_prec = (positives[gt_mask_prec]).sum()
                 recall = float(n_tp) / max(1, int(n_gt))
-                precision = float(n_tp) / max(1, int(n_p))
+                precision = float(n_tp_prec) / max(1, int(n_p))
                 if verbose:
                     print("nGT", int(n_gt), "recall", int(n_tp), "nP", int(n_p), "loss", float(loss.data))
             metrics = {"loss": loss, "recall": recall, "precision": precision}

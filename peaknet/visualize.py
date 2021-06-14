@@ -10,14 +10,15 @@ def scalar_metrics(writer, metrics, total_steps):
 def show_weights_model(writer, model, total_steps):
     print("*** WEIGHTS ***")
     print(model.state_dict()['ada_filter.0.weight'])
-    gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.1.weight'][:, 0].cpu().numpy()
-    channels = gen_peak_finding_w.shape[0]
-    fig, axs = plt.subplots(2, 4, figsize=(10, 5))
-    for c in range(min(8, channels)):
-        axs[c // 4, c % 4].imshow(gen_peak_finding_w[c], cmap='gray')
-    writer.add_figure('Generic Peak Finding Weights (0.1)', fig, global_step=total_steps)
-    # np_array = model.state_dict()['ada_filter.weight']
-    # print(np_array)
+    for key, item in enumerate(model.state_dict()):
+        print(key)
+        print(item.shape)
+    # gen_peak_finding_w = model.state_dict()['gen_peak_finding.0.1.weight'][:, 0].cpu().numpy()
+    # channels = gen_peak_finding_w.shape[0]
+    # fig, axs = plt.subplots(2, 4, figsize=(10, 5))
+    # for c in range(min(8, channels)):
+    #     axs[c // 4, c % 4].imshow(gen_peak_finding_w[c], cmap='gray')
+    # writer.add_figure('Generic Peak Finding Weights (0.1)', fig, global_step=total_steps)
 
 def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model, n=32, use_indexed_peaks=False):
     print("*** PANELS ***")
