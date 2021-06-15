@@ -6,7 +6,7 @@ class AdaFilter_1(nn.Module):
     def __init__(self, params=None):
         super(AdaFilter_1, self).__init__()
 
-        k_ada_filter_1 = 3
+        k_ada_filter_1 = 1
         in_ada_filter = 32
         out_ada_filter = 32
         groups_ada_filter = 32
@@ -18,8 +18,8 @@ class AdaFilter_1(nn.Module):
         self.ada_filter = nn.Sequential(nn.ReflectionPad2d(pad_ada_filter_1), conv) # input in [0, 1], output in [0, ?]
         torch.nn.init.xavier_uniform_(conv.weight)
 
-        k_list = [5, 5]
-        in_list = [1, 3]
+        k_list = [5, 5, 3]
+        in_list = [1, 3, 3]
         out_list = in_list[1:] + [1]
         pad_list = [(k - 1) // 2 for k in k_list]
         conv_list = []
