@@ -6,7 +6,7 @@ class AdaFilter_1(nn.Module):
     def __init__(self, params=None):
         super(AdaFilter_1, self).__init__()
 
-        k_ada_filter_1 = 1
+        k_ada_filter_1 = 3
         in_ada_filter = 32
         out_ada_filter = 32
         groups_ada_filter = 32
