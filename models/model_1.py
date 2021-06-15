@@ -18,8 +18,8 @@ class AdaFilter_1(nn.Module):
         self.ada_filter = nn.Sequential(nn.ReflectionPad2d(pad_ada_filter_1), conv) # input in [0, 1], output in [0, ?]
         torch.nn.init.xavier_uniform_(conv.weight)
 
-        k_list = [5, 5, 3]
-        in_list = [1, 3, 3]
+        k_list = [5, 5]
+        in_list = [1, 3]
         out_list = in_list[1:] + [1]
         pad_list = [(k - 1) // 2 for k in k_list]
         conv_list = []
@@ -32,7 +32,7 @@ class AdaFilter_1(nn.Module):
             torch.nn.init.xavier_uniform_(conv.weight)
         self.gen_peak_finding = nn.Sequential(*conv_list)
 
-        k_out = 1
+        k_out = 3
         pad_out = (k_out - 1) // 2
         conv_out = nn.Conv2d(32, 32, k_out, padding=0, groups=32)
         torch.nn.init.xavier_uniform_(conv_out.weight)
