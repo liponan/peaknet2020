@@ -194,6 +194,7 @@ class CXILabel(Dataset):
         print(my_event_idx)
         print(my_npeaks)
         print("")
+        print(np.argwhere(self.eventIdx_test == my_event_idx))
         idx_test = np.argwhere(self.eventIdx_test == my_event_idx)[0,0]
         my_npeaks_test = self.nPeaks_test[idx_test]
         my_event_idx_test = self.eventIdx_test[idx_test]
