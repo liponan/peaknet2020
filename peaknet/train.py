@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from data import PSANADataset, PSANAImage
 from unet import UNet
-from models import AdaFilter_0, AdaFilter_1
+from models import AdaFilter_0, AdaFilter_1, AdaFilter_2
 from loss import PeaknetBCELoss, PeakNetBCE1ChannelLoss
 from saver import Saver
 import visualize
@@ -170,6 +170,8 @@ def load_model(params):
         model = AdaFilter_0(params=params)
     elif params["model"] == "model_1":
         model = AdaFilter_1(params=params)
+    elif params["model"] == "model_2":
+        model = AdaFilter_2(params=params)
     else:
         print("Unrecognized model.")
         model = None
