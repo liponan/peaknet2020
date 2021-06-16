@@ -25,7 +25,7 @@ class AdaFilter_2(nn.Module):
 
         # Generic Peak Finding
         k_list = [5, 5]
-        n_list = [1, 3]
+        n_list = [3]
         NL = nn.Tanh()
         #
         in_list = [1] + n_list
