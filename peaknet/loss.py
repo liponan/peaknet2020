@@ -59,7 +59,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             self.maxpool_idxg = nn.MaxPool2d(7, stride=1, padding=3)
         self.bceloss = None
         self.maxpool = nn.Sequential(nn.ReflectionPad2d(1),
-                                     nn.MaxPool2d(3))
+                                     nn.MaxPool2d(3, stride=1, padding=0))
         self.pos_weight = torch.Tensor([pos_weight])
         if device is not None:
             self.pos_weight = self.pos_weight.to(device)
