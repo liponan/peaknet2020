@@ -56,6 +56,7 @@ class AdaFilter_1(nn.Module):
         self.pd_scaling = nn.Sequential(*layers)
 
     def create_panel_to_filter_encoder(self, k):
+        return
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
