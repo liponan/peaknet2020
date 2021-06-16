@@ -66,9 +66,9 @@ class AdaFilter_1(nn.Module):
         n_list = [3, 6, 10]
         conv1 = nn.Conv2d(n_panels, n_list[0] * n_panels, 3, padding=1, groups=n_panels)
         pooling1 = nn.MaxPool2d([4, 8])
-        conv2 = nn.Conv2d(8 * n_panels, n_list[1] * n_panels, 3, padding=1, groups=n_panels)
+        conv2 = nn.Conv2d(n_list[0] * n_panels, n_list[1] * n_panels, 3, padding=1, groups=n_panels)
         pooling2 = nn.MaxPool2d([8, 8])
-        conv3 = nn.Conv2d(16 * n_panels, n_list[2] * n_panels, 3, padding=1, groups=n_panels)
+        conv3 = nn.Conv2d(n_list[1] * n_panels, n_list[2] * n_panels, 3, padding=1, groups=n_panels)
         pooling3 = nn.MaxPool2d([5, 6])
         encoder = nn.Sequential(conv1, NL, pooling1,
                                 conv2, NL, pooling2,
