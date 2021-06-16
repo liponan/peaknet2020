@@ -71,11 +71,11 @@ class AdaFilter_1(nn.Module):
         k = 3
         #
         pad = (k - 1) // 2
-        conv1 = nn.Conv2d(self.n_panels, n_list[0] * self.n_panels, k, padding=pad, groups=self.n_panels, stride=(4, 8))
+        conv1 = nn.Conv2d(self.n_panels, n_list[0] * self.n_panels, k, groups=self.n_panels, stride=(4, 8))
         norm1 = torch.nn.GroupNorm(self.n_panels, n_list[0] * self.n_panels)
-        conv2 = nn.Conv2d(n_list[0] * self.n_panels, n_list[1] * self.n_panels, k, padding=pad, groups=self.n_panels, stride=(8, 8))
+        conv2 = nn.Conv2d(n_list[0] * self.n_panels, n_list[1] * self.n_panels, k, groups=self.n_panels, stride=(8, 8))
         norm2 = torch.nn.GroupNorm(self.n_panels, n_list[1] * self.n_panels)
-        conv3 = nn.Conv2d(n_list[1] * self.n_panels, n_list[2] * self.n_panels, k, padding=pad, groups=self.n_panels, stride=(5, 6))
+        conv3 = nn.Conv2d(n_list[1] * self.n_panels, n_list[2] * self.n_panels, k, groups=self.n_panels, stride=(5, 6))
         norm3 = torch.nn.GroupNorm(self.n_panels, n_list[2] * self.n_panels)
         encoder = nn.Sequential(conv1, norm1, NL,
                                 conv2, norm2, NL,
@@ -88,6 +88,8 @@ class AdaFilter_1(nn.Module):
         # k = 3
         k = self.k_ada_filter
         N = x.size(0)
+        print(x.shape)
+        print(self)
         filters_bias = self.linear_layer(self.encoder(x).view(N * self.n_panels, -1))
         filters = filters_bias[:, :-1].view(N * self.n_panels, 1, k, k)
         bias = filters_bias[:, -1:].view(-1)
