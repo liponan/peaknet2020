@@ -52,19 +52,19 @@ class PeaknetBCELoss(nn.Module):
 
 class PeakNetBCE1ChannelLoss(nn.Module):
 
-    def __init__(self, pos_weight=1.0, kernel_MaxPool=3, device=None, use_indexed_peaks=False):
+    def __init__(self, pos_weight=1.0, device=None, use_indexed_peaks=False):
         super(PeakNetBCE1ChannelLoss, self).__init__()
         self.use_indexed_peaks = use_indexed_peaks
         if use_indexed_peaks:
             self.maxpool_idxg = nn.MaxPool2d(7, stride=1, padding=3)
         self.bceloss = None
-        padding = (kernel_MaxPool - 1)//2
-        self.maxpool = nn.MaxPool2d(kernel_MaxPool, stride=1, padding=padding)
+        self.maxpool = nn.Sequential(nn.ReflectionPad2d(1),
+                                     nn.MaxPool2d(3))
         self.pos_weight = torch.Tensor([pos_weight])
         if device is not None:
             self.pos_weight = self.pos_weight.to(device)
 
-    def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
+    def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=True):
         if self.use_indexed_peaks:
             peak_finding = targets[:, 0, :, :].reshape(-1)
             indexing = self.maxpool(targets)[:, 1, :, :].reshape(-1)
@@ -96,7 +96,6 @@ class PeakNetBCE1ChannelLoss(nn.Module):
 
         else:
             if maxpool:
-                scores = self.maxpool(scores)
                 targets = self.maxpool(targets)
             scores_c = scores[:, 0, :, :].reshape(-1)
             targets_c = targets[:, 0, :, :].reshape(-1)
@@ -111,10 +110,8 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                 positives = (nn.Sigmoid()(scores_c) > cutoff)
                 n_p = positives.sum()
                 n_tp = (positives[gt_mask]).sum()
-                gt_mask_prec = self.maxpool(targets)[:, 0, :, :].reshape(-1) > 0.5
-                n_tp_prec = (positives[gt_mask_prec]).sum()
                 recall = float(n_tp) / max(1, int(n_gt))
-                precision = float(n_tp_prec) / max(1, int(n_p))
+                precision = float(n_tp) / max(1, int(n_p))
                 if verbose:
                     print("nGT", int(n_gt), "recall", int(n_tp), "nP", int(n_p), "loss", float(loss.data))
             metrics = {"loss": loss, "recall": recall, "precision": precision}
