@@ -90,6 +90,7 @@ class AdaFilter_1(nn.Module):
         # k = 3
         k = 3
         #
+        print(self.encoder(x).shape)
         filters_bias = self.encoder(x).view(self.batch_size, self.n_panels, -1)
         filters = filters_bias[:, :, :-1].reshape(self.batch_size * self.n_panels, 1, k, k)
         bias = filters_bias[:, :, -1:].reshape(self.batch_size * self.n_panels,)
@@ -103,10 +104,12 @@ class AdaFilter_1(nn.Module):
             # the filtering will be panel-dependent AND experiment-dependent
             x = x.view(1, -1, h, w)
         filtered_x = self.pd_filtering(x)
+        # generic peak finiding is panel/experiment-independent
         filtered_x = filtered_x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
         if self.residual:
             logits += filtered_x
+        # panel-dependent scaling
         panel_logits = logits.view(-1 , 32, h, w)
         panel_logits = self.pd_scaling(panel_logits)
         logits_out = panel_logits.view(-1, 1, h, w)
