@@ -56,10 +56,14 @@ class AdaFilter_1(nn.Module):
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
+        print(x.shape)
         filtered_x = self.pd_filtering(x)
+        print(filtered_x.shape)
         filtered_x = filtered_x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
+        print(logits.shape)
         panel_logits = logits.view(-1 , 32, h, w)
         panel_logits = self.pd_scaling(panel_logits)
+        print(panel_logits.shape)
         logits_out = panel_logits.view(-1, 1, h, w)
         return logits_out
