@@ -100,6 +100,8 @@ class AdaFilter_1(nn.Module):
         h, w = x.size(2), x.size(3)
         if self.adaptive_filtering:
             self.use_encoder(x)
+            # the filtering will be panel-dependent AND experiment-dependent
+            x = x.view(1, -1, h, w)
         filtered_x = self.pd_filtering(x)
         filtered_x = filtered_x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
