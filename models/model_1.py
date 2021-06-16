@@ -9,7 +9,7 @@ class AdaFilter_1(nn.Module):
         n_panels = 32
 
         # Panel-dependent Filtering
-        k_list = [5]
+        k_list = [3]
         n_list = []
         NL = nn.LeakyReLU()
         self.adaptive_filtering = True
@@ -59,15 +59,16 @@ class AdaFilter_1(nn.Module):
                                         conv))
         self.pd_scaling = nn.Sequential(*layers)
 
-    def create_panel_to_filter_encoder(self, k=5, n_panels=32):
+    def create_panel_to_filter_encoder(self, k=3, n_panels=32):
         # h = 185 ~ 4 * 8 * 5, w = 388 ~ 8 * 8 * 6
-        # k ** 2 = 25 -> 8, 16, 25
+        # k ** 2 = 9 -> 3, 6, 9 + 1 (bias) = 10
         NL = nn.ReLU()
-        conv1 = nn.Conv2d(n_panels, 8 * n_panels, 3, padding=1, groups=n_panels)
+        n_list = [3, 6, 10]
+        conv1 = nn.Conv2d(n_panels, n_list[0] * n_panels, 3, padding=1, groups=n_panels)
         pooling1 = nn.MaxPool2d([4, 8])
-        conv2 = nn.Conv2d(8 * n_panels, 16 * n_panels, 3, padding=1, groups=n_panels)
+        conv2 = nn.Conv2d(8 * n_panels, n_list[1] * n_panels, 3, padding=1, groups=n_panels)
         pooling2 = nn.MaxPool2d([8, 8])
-        conv3 = nn.Conv2d(16 * n_panels, 25 * n_panels, 3, padding=1, groups=n_panels)
+        conv3 = nn.Conv2d(16 * n_panels, n_list[2] * n_panels, 3, padding=1, groups=n_panels)
         pooling3 = nn.MaxPool2d([5, 6])
         encoder = nn.Sequential(conv1, NL, pooling1,
                                 conv2, NL, pooling2,
@@ -81,6 +82,8 @@ class AdaFilter_1(nn.Module):
             filters = self.encoder(x)
             print(filters.shape)
             print(self.state_dict().keys())
+            print(self.state_dict()['pd_filtering.0.1.weight'].shape)
+            print(self.state_dict()['pd_filtering.0.1.bias'].shape)
             time.sleep(5)
         filtered_x = self.pd_filtering(x)
         filtered_x = filtered_x.view(-1, 1, h, w)
