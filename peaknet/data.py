@@ -165,7 +165,7 @@ class CXILabel(Dataset):
         self.f_test = h5py.File('/cds/data/psdm/cxi/cxic0415/scratch/axlevy/psocake/r0100/cxic0415_0100_psocake2.cxi', "r")
         self.nPeaks_test = self.f_test["entry_1/result_1/nPeaks"]
         self.n_hits_test = len(self.nPeaks_test)
-        self.eventIdx_test = self.f_test["LCLS/eventNumber"][()]
+        self.eventIdx_test = self.f_test["LCLS/eventNumber"][:self.n_hits_test]
         print('eventIdx_test')
         print(self.eventIdx_test)
 
@@ -177,6 +177,8 @@ class CXILabel(Dataset):
         self.peak_x_center = self.f['entry_1/result_1/peak2'][:self.n_hits, :]
         self.peak_y_center = self.f['entry_1/result_1/peak1'][:self.n_hits, :]
         self.detector = str(self.f["entry_1/instrument_1/detector_1/description"][()])
+        print('eventIdx')
+        print(self.eventIdx)
 
         self.use_indexed_peaks = use_indexed_peaks
         if use_indexed_peaks:
