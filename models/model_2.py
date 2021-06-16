@@ -9,7 +9,7 @@ class AdaFilter_2(nn.Module):
 
         # Panel-dependent Filtering
         k_list = [3, 3]
-        n_list = [8 * n_filters]
+        n_list = [4 * n_filters]
         NL = nn.LeakyReLU()
         #
         in_list = [n_filters] + n_list
