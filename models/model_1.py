@@ -8,9 +8,9 @@ class AdaFilter_1(nn.Module):
         n_panels = 32
 
         # Panel-dependent Filtering
-        k_list = [3, 3]
-        n_list = [4 * n_panels]
-        NL = nn.LeakyReLU()
+        k_list = [5]
+        n_list = []
+        NL = nn.Tanh()
         #
         in_list = [n_panels] + n_list
         out_list = n_list + [n_panels]
@@ -27,7 +27,7 @@ class AdaFilter_1(nn.Module):
         k_list = [5, 5]
         n_list = [3]
         NL = nn.Tanh()
-        self.residual = False
+        self.residual = True
         #
         in_list = [1] + n_list
         out_list = n_list + [1]

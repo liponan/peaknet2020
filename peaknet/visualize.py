@@ -102,7 +102,7 @@ def show_inter_act(writer, img_vis, total_steps, params, device, model):
     for i in panels:
         title = 'Intermediate Activations Panel ' + str(i)
 
-        fig = plt.figure(figsize=(20, 10))
+        fig = plt.figure(figsize=(10, 20))
         plt.subplot(411)
         plt.imshow(img_vis[i], cmap='Blues')
         plt.colorbar()
