@@ -91,15 +91,15 @@ class AdaFilter_1(nn.Module):
         bias = filters_bias[:, :, -1:].reshape(-1)
         return filters, bias
 
-    def forward(self, x):
+    def forward(self, x, return_intermediate_act=False):
         N, h, w = x.size(0), x.size(2), x.size(3)
         if self.adaptive_filtering:
             filters, bias = self.use_encoder(x)
             # the filtering will be panel-dependent AND experiment-dependent
-            x = x.view(1, -1, h, w)
+            filtered_x = x.view(1, -1, h, w)
             pad = (self.k_ada_filter - 1) // 2
-            x = nn.ReflectionPad2d(pad)(x)
-            filtered_x = nn.functional.conv2d(x, filters, bias=bias, groups=N*self.n_panels)
+            filtered_x = nn.ReflectionPad2d(pad)(filtered_x)
+            filtered_x = nn.functional.conv2d(filtered_x, filters, bias=bias, groups=N*self.n_panels)
         else:
             filtered_x = self.pd_filtering(x)
         # generic peak finiding is panel/experiment-independent
@@ -111,16 +111,7 @@ class AdaFilter_1(nn.Module):
         panel_logits = logits.view(-1 , 32, h, w)
         panel_logits = self.pd_scaling(panel_logits)
         logits_out = panel_logits.view(-1, 1, h, w)
-        return logits_out
-
-    def forward_with_inter_act(self, x):
-        h, w = x.size(2), x.size(3)
-        filtered_x = self.pd_filtering(x)
-        filtered_x = filtered_x.view(-1, 1, h, w)
-        logits = self.gen_peak_finding(filtered_x)
-        if self.residual:
-            logits += filtered_x
-        panel_logits = logits.view(-1 , 32, h, w)
-        panel_logits = self.pd_scaling(panel_logits)
-        logits_out = panel_logits.view(-1, 1, h, w)
-        return x, filtered_x, logits, logits_out
+        if return_intermediate_act:
+            return x, filtered_x, logits, logits_out
+        else:
+            return logits_out
