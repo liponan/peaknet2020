@@ -20,11 +20,16 @@ def show_weights_model(writer, model, total_steps):
     #     axs[c // 4, c % 4].imshow(gen_peak_finding_w[c], cmap='gray')
     # writer.add_figure('Generic Peak Finding Weights (0.1)', fig, global_step=total_steps)
 
-def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model, n=32, use_indexed_peaks=False):
+def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device, model, use_indexed_peaks=False):
     print("*** PANELS ***")
 
     center_panels = [0, 1, 8, 9, 16, 17, 24, 25]
     top_left = [4, 5]
+
+    h, w = img_vis.size(1), img_vis.size(2)
+    x = img_vis.view(1, -1, h, w).to(device)
+    scores = model(x)
+    scores = nn.Sigmoid()(scores).cpu().numpy()
 
     for i in center_panels + top_left:
         panel_name = 'panel_'+str(i)
@@ -36,10 +41,6 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         plt.yticks([])
 
         # Prediction
-        h, w = img_vis.size(1), img_vis.size(2)
-        x = img_vis.view(1, -1, h, w).to(device)
-        scores = model(x)
-        scores = nn.Sigmoid()(scores).cpu().numpy()
         indices_nonzero = np.array(np.argwhere(scores[i, 0] > params["cutoff"]))
         if params["n_classes"] == 3:
             shift_u = scores[i, 1, indices_nonzero[:, 0], indices_nonzero[:, 1]].numpy()
@@ -85,3 +86,43 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         plt.yticks([])
 
         writer.add_figure(panel_name, fig, global_step=total_steps)
+
+def show_inter_act(writer, img_vis, total_steps, params, device, model):
+    print("*** INTERMEDIATE ACTIVATIONS ***")
+
+    panels = [0]
+
+    h, w = img_vis.size(1), img_vis.size(2)
+    x = img_vis.view(1, -1, h, w).to(device)
+    scores = model.forward_with_inter_act(x)
+    _, filtered_x, logits, logits_out = nn.Sigmoid()(scores).cpu().numpy()
+
+    for i in panels:
+        title = 'Intermediate Activations Panel ' + str(i)
+
+        fig = plt.figure(figsize=(20, 10))
+        plt.subplot(111)
+        plt.imshow(img_vis[i], cmap='Blues')
+        plt.colorbar()
+        plt.xticks([])
+        plt.yticks([])
+
+        plt.subplot(211)
+        plt.imshow(filtered_x[i, 0], cmap='Blues')
+        plt.colorbar()
+        plt.xticks([])
+        plt.yticks([])
+
+        plt.subplot(311)
+        plt.imshow(logits[i, 0], cmap='Blues')
+        plt.colorbar()
+        plt.xticks([])
+        plt.yticks([])
+
+        plt.subplot(111)
+        plt.imshow(logits_out[i, 0], cmap='Blues')
+        plt.colorbar()
+        plt.xticks([])
+        plt.yticks([])
+
+        writer.add_figure(title, fig, global_step=total_steps)
