@@ -10,7 +10,7 @@ class AdaFilter_1(nn.Module):
         # Panel-dependent Filtering
         k_list = [5]
         n_list = []
-        NL = nn.Tanh()
+        NL = nn.LeakyReLU()
         #
         in_list = [n_panels] + n_list
         out_list = n_list + [n_panels]
@@ -54,6 +54,8 @@ class AdaFilter_1(nn.Module):
             layers.append(nn.Sequential(nn.ReflectionPad2d(pad_list[i]),
                                         conv))
         self.pd_scaling = nn.Sequential(*layers)
+
+    def create_panel_to_filter_encoder(self, k):
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
