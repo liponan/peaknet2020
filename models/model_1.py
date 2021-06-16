@@ -92,14 +92,14 @@ class AdaFilter_1(nn.Module):
         return filters, bias
 
     def forward(self, x):
-        h, w = x.size(2), x.size(3)
+        N, h, w = x.size(0), x.size(2), x.size(3)
         if self.adaptive_filtering:
             filters, bias = self.use_encoder(x)
             # the filtering will be panel-dependent AND experiment-dependent
             x = x.view(1, -1, h, w)
             pad = (self.k_ada_filter - 1) // 2
             x = nn.ReflectionPad2d(pad)(x)
-            filtered_x = nn.functional.conv2d(x, filters, bias=bias, groups=self.n_panels)
+            filtered_x = nn.functional.conv2d(x, filters, bias=bias, groups=N*self.n_panels)
         else:
             filtered_x = self.pd_filtering(x)
         # generic peak finiding is panel/experiment-independent
