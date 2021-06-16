@@ -162,12 +162,12 @@ class CXILabel(Dataset):
     def __init__(self, cxi_path, use_indexed_peaks, fmod=True):
         self.f = h5py.File(cxi_path, "r")
         # Test constistency
-        self.f_test = h5py.File('/cds/data/psdm/cxi/cxic0415/scratch/axlevy/psocake/r0100/cxic0415_0100_psocake2.cxi', "r")
-        self.nPeaks_test = self.f_test["entry_1/result_1/nPeaks"]
-        self.n_hits_test = len(self.nPeaks_test)
-        self.eventIdx_test = self.f_test["LCLS/eventNumber"][:self.n_hits_test]
-        print('eventIdx_test')
-        print(self.eventIdx_test)
+        # self.f_test = h5py.File('/cds/data/psdm/cxi/cxic0415/scratch/axlevy/psocake/r0100/cxic0415_0100_psocake2.cxi', "r")
+        # self.nPeaks_test = self.f_test["entry_1/result_1/nPeaks"]
+        # self.n_hits_test = len(self.nPeaks_test)
+        # self.eventIdx_test = self.f_test["LCLS/eventNumber"][:self.n_hits_test]
+        # print('eventIdx_test')
+        # print(self.eventIdx_test)
 
         self.nPeaks = self.f["entry_1/result_1/nPeaks"]
         self.n_hits = len(self.nPeaks)
@@ -177,8 +177,8 @@ class CXILabel(Dataset):
         self.peak_x_center = self.f['entry_1/result_1/peak2'][:self.n_hits, :]
         self.peak_y_center = self.f['entry_1/result_1/peak1'][:self.n_hits, :]
         self.detector = str(self.f["entry_1/instrument_1/detector_1/description"][()])
-        print('eventIdx')
-        print(self.eventIdx)
+        # print('eventIdx')
+        # print(self.eventIdx)
 
         self.use_indexed_peaks = use_indexed_peaks
         if use_indexed_peaks:
@@ -194,18 +194,18 @@ class CXILabel(Dataset):
         my_npeaks = self.nPeaks[idx]
         my_event_idx = self.eventIdx[idx]
         # Test consistency
-        print(idx)
-        print(my_event_idx)
-        print(my_npeaks)
-        print("")
-        print(np.argwhere(self.eventIdx_test == my_event_idx))
-        idx_test = np.argwhere(self.eventIdx_test == my_event_idx)[0,0]
-        my_npeaks_test = self.nPeaks_test[idx_test]
-        my_event_idx_test = self.eventIdx_test[idx_test]
-        print(idx_test)
-        print(my_event_idx_test)
-        print(my_npeaks_test)
-        time.sleep(5)
+        # print(idx)
+        # print(my_event_idx)
+        # print(my_npeaks)
+        # print("")
+        # print(np.argwhere(self.eventIdx_test == my_event_idx))
+        # idx_test = np.argwhere(self.eventIdx_test == my_event_idx)[0,0]
+        # my_npeaks_test = self.nPeaks_test[idx_test]
+        # my_event_idx_test = self.eventIdx_test[idx_test]
+        # print(idx_test)
+        # print(my_event_idx_test)
+        # print(my_npeaks_test)
+        # time.sleep(5)
 
         # psana style
         my_s = np.floor_divide(self.peak_y_label[idx, 0:my_npeaks], 185) \

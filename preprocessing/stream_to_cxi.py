@@ -67,7 +67,7 @@ def get_fs_ss_panel(extract, idx_stream, nIndexedPeaks):
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--filename", "-f", type=str, required=True, help="Path to .stream file")
-    p.add_argument("--events_per_cxi", type=int, default=1000, help="Number of events per .cxi file")
+    p.add_argument("--events_per_cxi", type=int, default=20000, help="Number of events per .cxi file")
     p.add_argument("--max_n_peaks", type=int, default=2048, help="Maximum number of peaks (for peak finding)")
     p.add_argument("--max_n_indexed_peaks", type=int, default=2048, help="Maximum number of peaks (for indexing)")
     p.add_argument("--default_detector", type=str, default="CxiDs1.0:Cspad.0", help="Default detector type")
