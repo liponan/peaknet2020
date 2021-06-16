@@ -90,7 +90,6 @@ class AdaFilter_1(nn.Module):
         # k = 3
         k = 3
         #
-        print(self.encoder(x).shape)
         filters_bias = self.encoder(x).view(self.batch_size, self.n_panels, -1)
         filters = filters_bias[:, :, :-1].reshape(self.batch_size * self.n_panels, 1, k, k)
         bias = filters_bias[:, :, -1:].reshape(self.batch_size * self.n_panels,)
