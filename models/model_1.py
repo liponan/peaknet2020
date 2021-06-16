@@ -7,9 +7,7 @@ class AdaFilter_1(nn.Module):
     def __init__(self, params=None):
         super(AdaFilter_1, self).__init__()
         n_panels = 32
-        batch_size = params["batch_size"]
         self.n_panels = n_panels
-        self.batch_size = batch_size
 
         # Panel-dependent Filtering
         k_list = [3]
@@ -17,22 +15,20 @@ class AdaFilter_1(nn.Module):
         NL = nn.LeakyReLU()
         self.adaptive_filtering = True
         #
-        if self.adaptive_filtering:
-            n_groups = n_panels * batch_size
-        else:
-            n_groups = n_panels
-        in_list = [n_groups] + n_list
-        out_list = n_list + [n_groups]
-        pad_list = [(k - 1) // 2 for k in k_list]
-        layers = []
-        for i in range(len(k_list)):
-            conv = nn.Conv2d(in_list[i], out_list[i], k_list[i], groups=n_groups)
-            layers.append(nn.Sequential(nn.ReflectionPad2d(pad_list[i]),
-                                           conv,
-                                           NL))
-        self.pd_filtering = nn.Sequential(*layers)
+        if not self.adaptive_filtering:
+            in_list = [n_panels] + n_list
+            out_list = n_list + [n_panels]
+            pad_list = [(k - 1) // 2 for k in k_list]
+            layers = []
+            for i in range(len(k_list)):
+                conv = nn.Conv2d(in_list[i], out_list[i], k_list[i], groups=n_panels)
+                layers.append(nn.Sequential(nn.ReflectionPad2d(pad_list[i]),
+                                               conv,
+                                               NL))
+            self.pd_filtering = nn.Sequential(*layers)
         if self.adaptive_filtering:
             self.encoder = self.create_panel_to_filter_encoder()
+            self.k_ada_filter = k_list[0]
 
         # Generic Peak Finding
         k_list = [3, 3]
@@ -88,21 +84,24 @@ class AdaFilter_1(nn.Module):
 
     def use_encoder(self, x):
         # k = 3
-        k = 3
-        #
-        filters_bias = self.encoder(x).view(self.batch_size, self.n_panels, -1)
-        filters = filters_bias[:, :, :-1].reshape(self.batch_size * self.n_panels, 1, k, k)
-        bias = filters_bias[:, :, -1:].reshape(self.batch_size * self.n_panels,)
-        self.state_dict()['pd_filtering.0.1.weight'] = filters
-        self.state_dict()['pd_filtering.0.1.bias'] = bias
+        k = self.k_ada_filter
+        N = x.size(0)
+        filters_bias = self.encoder(x).view(N, self.n_panels, -1)
+        filters = filters_bias[:, :, :-1].reshape(N * self.n_panels, 1, k, k)
+        bias = filters_bias[:, :, -1:].reshape(-1)
+        return filters, bias
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
         if self.adaptive_filtering:
-            self.use_encoder(x)
+            filters, bias = self.use_encoder(x)
             # the filtering will be panel-dependent AND experiment-dependent
             x = x.view(1, -1, h, w)
-        filtered_x = self.pd_filtering(x)
+            pad = (self.k_ada_filter - 1) // 2
+            x = nn.ReflectionPad2d(pad)(x)
+            filtered_x = nn.functional.conv2d(x, filters, bias=bias, groups=self.n_panels)
+        else:
+            filtered_x = self.pd_filtering(x)
         # generic peak finiding is panel/experiment-independent
         filtered_x = filtered_x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
