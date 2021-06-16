@@ -128,7 +128,7 @@ def train(model, device, params, writer):
                         visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device,
                                                            model, use_indexed_peaks=params["use_indexed_peaks"])
                         # visualize.show_weights_model(writer, model, total_steps)
-                        visualize.show_inter_act(writer, img_vis, total_steps, params, device, model)
+                        # visualize.show_inter_act(writer, img_vis, total_steps, params, device, model)
             psana_images.close()
     saver.save(params["save_name"])
     torch.save(model, "debug/"+params["experiment_name"]+"/model.pt")

@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import time
 
 class AdaFilter_1(nn.Module):
 
@@ -11,6 +12,7 @@ class AdaFilter_1(nn.Module):
         k_list = [5]
         n_list = []
         NL = nn.LeakyReLU()
+        self.adaptive_filtering = True
         #
         in_list = [n_panels] + n_list
         out_list = n_list + [n_panels]
@@ -22,9 +24,11 @@ class AdaFilter_1(nn.Module):
                                            conv,
                                            NL))
         self.pd_filtering = nn.Sequential(*layers)
+        if self.adaptive_filtering:
+            self.encoder = self.create_panel_to_filter_encoder()
 
         # Generic Peak Finding
-        k_list = [5, 5]
+        k_list = [3, 3]
         n_list = [3]
         NL = nn.LeakyReLU()
         self.residual = True
@@ -55,11 +59,29 @@ class AdaFilter_1(nn.Module):
                                         conv))
         self.pd_scaling = nn.Sequential(*layers)
 
-    def create_panel_to_filter_encoder(self, k):
-        return
+    def create_panel_to_filter_encoder(self, k=5, n_panels=32):
+        # h = 185 ~ 4 * 8 * 5, w = 388 ~ 8 * 8 * 6
+        # k ** 2 = 25 -> 8, 16, 25
+        NL = nn.ReLU()
+        conv1 = nn.Conv2d(n_panels, 8 * n_panels, 3, padding=1, groups=n_panels)
+        pooling1 = nn.MaxPool2d([4, 8])
+        conv2 = nn.Conv2d(8 * n_panels, 16 * n_panels, 3, padding=1, groups=n_panels)
+        pooling2 = nn.MaxPool2d([8, 8])
+        conv3 = nn.Conv2d(16 * n_panels, 25 * n_panels, 3, padding=1, groups=n_panels)
+        pooling3 = nn.MaxPool2d([5, 6])
+        encoder = nn.Sequential(conv1, NL, pooling1,
+                                conv2, NL, pooling2,
+                                conv3, NL, pooling3
+                                )
+        return encoder
 
     def forward(self, x):
         h, w = x.size(2), x.size(3)
+        if self.adaptive_filtering:
+            filters = self.encoder(x)
+            print(filters.shape)
+            print(self.state_dict().keys)
+            time.sleep(5)
         filtered_x = self.pd_filtering(x)
         filtered_x = filtered_x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
