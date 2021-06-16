@@ -78,7 +78,7 @@ def main():
     max_n_peaks = args.max_n_peaks
     max_n_indexed_peaks = args.max_n_indexed_peaks
 
-    print()
+    print('')
     default_detector = args.default_detector
     print("The detector is unknown.")
     print("Default detector " + default_detector + " will be used.")
@@ -109,7 +109,7 @@ def main():
     # n_cxi_files = 1
 
     for idx_cxi in range(n_cxi_files):
-        print()
+        print('')
         print("Writing cxi file " + str(idx_cxi + 1) + "/" + str(n_cxi_files) + "...")
         name_cxi = 'file_' + str(idx_cxi) + '.cxi'
         print("Name: " + name_cxi)
