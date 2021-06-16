@@ -80,7 +80,7 @@ class AdaFilter_1(nn.Module):
         if self.adaptive_filtering:
             filters = self.encoder(x)
             print(filters.shape)
-            print(self.state_dict().keys)
+            print(self.state_dict().keys())
             time.sleep(5)
         filtered_x = self.pd_filtering(x)
         filtered_x = filtered_x.view(-1, 1, h, w)
