@@ -23,11 +23,12 @@ class AdaFilter_1(nn.Module):
             for i in range(len(k_list)):
                 conv = nn.Conv2d(in_list[i], out_list[i], k_list[i], groups=n_panels)
                 layers.append(nn.Sequential(nn.ReflectionPad2d(pad_list[i]),
-                                               conv,
-                                               NL))
+                                            conv,
+                                            torch.nn.GroupNorm(n_panels, out_list[i]),
+                                            NL))
             self.pd_filtering = nn.Sequential(*layers)
-        if self.adaptive_filtering:
-            self.encoder = self.create_panel_to_filter_encoder()
+        else:
+            self.encoder, self.linear_layer = self.create_panel_to_filter_encoder()
             self.k_ada_filter = k_list[0]
 
         # Generic Peak Finding
@@ -70,25 +71,26 @@ class AdaFilter_1(nn.Module):
         k = 3
         #
         pad = (k - 1) // 2
-        conv1 = nn.Conv2d(self.n_panels, n_list[0] * self.n_panels, k, padding=pad, groups=self.n_panels)
-        pooling1 = nn.MaxPool2d([4, 8])
-        conv2 = nn.Conv2d(n_list[0] * self.n_panels, n_list[1] * self.n_panels, k, padding=pad, groups=self.n_panels)
-        pooling2 = nn.MaxPool2d([8, 8])
-        conv3 = nn.Conv2d(n_list[1] * self.n_panels, n_list[2] * self.n_panels, k, padding=pad, groups=self.n_panels)
-        pooling3 = nn.MaxPool2d([5, 6])
-        encoder = nn.Sequential(conv1, NL, pooling1,
-                                conv2, NL, pooling2,
-                                conv3, NL, pooling3
+        conv1 = nn.Conv2d(self.n_panels, n_list[0] * self.n_panels, k, padding=pad, groups=self.n_panels, stride=(4, 8))
+        norm1 = torch.nn.GroupNorm(self.n_panels, n_list[0] * self.n_panels)
+        conv2 = nn.Conv2d(n_list[0] * self.n_panels, n_list[1] * self.n_panels, k, padding=pad, groups=self.n_panels, stride=(8, 8))
+        norm2 = torch.nn.GroupNorm(self.n_panels, n_list[1] * self.n_panels)
+        conv3 = nn.Conv2d(n_list[1] * self.n_panels, n_list[2] * self.n_panels, k, padding=pad, groups=self.n_panels, stride=(5, 6))
+        norm3 = torch.nn.GroupNorm(self.n_panels, n_list[2] * self.n_panels)
+        encoder = nn.Sequential(conv1, norm1, NL,
+                                conv2, norm2, NL,
+                                conv3, norm3, NL
                                 )
-        return encoder
+        linear_layer = nn.Linear(n_list[-1], n_list[-1])
+        return encoder, linear_layer
 
     def use_encoder(self, x):
         # k = 3
         k = self.k_ada_filter
         N = x.size(0)
-        filters_bias = self.encoder(x).view(N, self.n_panels, -1)
-        filters = filters_bias[:, :, :-1].reshape(N * self.n_panels, 1, k, k)
-        bias = filters_bias[:, :, -1:].reshape(-1)
+        filters_bias = self.linear_layer(self.encoder(x).view(N * self.n_panels, -1))
+        filters = filters_bias[:, :-1].view(N * self.n_panels, 1, k, k)
+        bias = filters_bias[:, -1:].view(-1)
         return filters, bias
 
     def forward(self, x, return_intermediate_act=False):
