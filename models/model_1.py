@@ -88,8 +88,6 @@ class AdaFilter_1(nn.Module):
         # k = 3
         k = self.k_ada_filter
         N = x.size(0)
-        print(x.shape)
-        print(self)
         filters_bias = self.linear_layer(self.encoder(x).view(N * self.n_panels, -1))
         filters = filters_bias[:, :-1].view(N * self.n_panels, 1, k, k)
         bias = filters_bias[:, -1:].view(-1)
