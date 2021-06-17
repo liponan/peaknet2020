@@ -10,8 +10,8 @@ class AdaFilter_1(nn.Module):
         self.n_panels = n_panels
 
         # Panel-dependent Filtering
-        k_list = [3]
-        n_list = []
+        k_list = [3, 3]
+        n_list = [16]
         NL = nn.LeakyReLU()
         self.adaptive_filtering = True
         #
