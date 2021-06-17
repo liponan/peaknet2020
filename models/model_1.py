@@ -101,10 +101,11 @@ class AdaFilter_1(nn.Module):
         idx_beg = 0
         for i in range(len(k_list)):
             # Prepare filters
-            n_param = (n_arr[i] * k_arr[i] ** 2 + 1) * n_arr[i+1]
-            weight = weight_bias[:, idx_beg:idx_beg+n_param-1].view(N * self.n_panels * n_arr[i+1], n_arr[i], k_arr[i], k_arr[i])
-            bias = weight_bias[:, idx_beg+n_param-1:idx_beg+n_param].view(N * self.n_panels * n_arr[i+1],)
-            idx_beg += n_param
+            n_weight = (n_arr[i] * k_arr[i] ** 2) * n_arr[i+1]
+            n_bias = n_arr[i+1]
+            weight = weight_bias[:, idx_beg:idx_beg+n_weight].view(N * self.n_panels * n_arr[i+1], n_arr[i], k_arr[i], k_arr[i])
+            bias = weight_bias[:, idx_beg+n_weight:idx_beg+n_weight+n_bias].view(N * self.n_panels * n_arr[i+1],)
+            idx_beg = idx_beg + n_weight + n_bias
             #
             pad = (k_arr[i] - 1) // 2
             filtered_x = nn.ReflectionPad2d(pad)(filtered_x)
