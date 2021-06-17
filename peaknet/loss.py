@@ -64,7 +64,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         if device is not None:
             self.pos_weight = self.pos_weight.to(device)
 
-    def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=True):
+    def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
         if self.use_indexed_peaks:
             peak_finding = targets[:, 0, :, :].reshape(-1)
             indexing = self.maxpool(targets)[:, 1, :, :].reshape(-1)
