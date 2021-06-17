@@ -103,8 +103,8 @@ class AdaFilter_1(nn.Module):
             # Prepare filters
             n_weight = (n_arr[i] * k_arr[i] ** 2) * n_arr[i+1]
             n_bias = n_arr[i+1]
-            weight = weight_bias[:, idx_beg:idx_beg+n_weight].view(N * self.n_panels * n_arr[i+1], n_arr[i], k_arr[i], k_arr[i])
-            bias = weight_bias[:, idx_beg+n_weight:idx_beg+n_weight+n_bias].view(N * self.n_panels * n_arr[i+1],)
+            weight = weight_bias[:, idx_beg:idx_beg+n_weight].reshape(N * self.n_panels * n_arr[i+1], n_arr[i], k_arr[i], k_arr[i])
+            bias = weight_bias[:, idx_beg+n_weight:idx_beg+n_weight+n_bias].reshape(N * self.n_panels * n_arr[i+1],)
             idx_beg = idx_beg + n_weight + n_bias
             #
             pad = (k_arr[i] - 1) // 2
