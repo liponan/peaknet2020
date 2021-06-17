@@ -34,8 +34,8 @@ class AdaFilter_1(nn.Module):
         # Generic Peak Finding
         k_list = [3, 3]
         n_list = [3]
-        NL = nn.LeakyReLU()
-        self.residual = True
+        NL = nn.Tanh()
+        self.residual = False
         #
         in_list = [1] + n_list
         out_list = n_list + [1]

@@ -104,24 +104,28 @@ def show_inter_act(writer, img_vis, total_steps, params, device, model):
 
         fig = plt.figure(figsize=(10, 20))
         plt.subplot(411)
+        plt.title("Original Panel")
         plt.imshow(img_vis[i], cmap='Blues')
         plt.colorbar()
         plt.xticks([])
         plt.yticks([])
 
         plt.subplot(412)
+        plt.title("After Panel/Exp-Dependent Filtering")
         plt.imshow(filtered_x[i, 0], cmap='Blues')
         plt.colorbar()
         plt.xticks([])
         plt.yticks([])
 
         plt.subplot(413)
+        plt.title("After Generic Peak Finding")
         plt.imshow(logits[i, 0], cmap='Blues')
         plt.colorbar()
         plt.xticks([])
         plt.yticks([])
 
         plt.subplot(414)
+        plt.title("After Panel-Dependent Scaling")
         plt.imshow(logits_out[i, 0], cmap='Blues')
         plt.colorbar()
         plt.xticks([])
