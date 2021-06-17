@@ -34,8 +34,8 @@ class AdaFilter_1(nn.Module):
             self.n_ada_filter = n_list
 
         # Generic Peak Finding
-        k_list = [5, 5]
-        n_list = [6]
+        k_list = [5, 5, 5]
+        n_list = [6, 6]
         NL_list = [nn.ReLU(), nn.ReLU()]
         self.residual = True
         #
@@ -52,7 +52,7 @@ class AdaFilter_1(nn.Module):
         self.gen_peak_finding = nn.Sequential(*layers)
 
         # Panel-Dependent Scaling
-        k_list = [1]
+        k_list = []
         n_list = []
         #
         in_list = [n_panels] + n_list
