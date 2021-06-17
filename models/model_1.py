@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 import time
 
 class AdaFilter_1(nn.Module):
@@ -28,13 +29,14 @@ class AdaFilter_1(nn.Module):
                                             NL))
             self.pd_filtering = nn.Sequential(*layers)
         else:
-            self.encoder, self.linear_layer = self.create_panel_to_filter_encoder()
-            self.k_ada_filter = k_list[0]
+            self.encoder, self.linear_layer = self.create_panel_to_filter_encoder(k_list, n_list)
+            self.k_ada_filter = k_list
+            self.n_ada_filter = n_list
 
         # Generic Peak Finding
-        k_list = [3, 3]
-        n_list = [3]
-        NL_list = [nn.LeakyReLU(), nn.Tanh()]
+        k_list = [3]
+        n_list = []
+        NL_list = [nn.Tanh()]
         self.residual = False
         #
         in_list = [1] + n_list
@@ -63,48 +65,59 @@ class AdaFilter_1(nn.Module):
                                         conv))
         self.pd_scaling = nn.Sequential(*layers)
 
-    def create_panel_to_filter_encoder(self):
+    def create_panel_to_filter_encoder(self, k_list, n_list):
         # h = 185 ~ 4 * 8 * 5, w = 388 ~ 8 * 8 * 6
         # k ** 2 = 9 -> 3, 6, 9 + 1 (bias) = 10
         NL = nn.ReLU()
-        n_list = [3, 6, 10]
         k = 3
+        n_layers = 3
+        n_features = 8
         #
-        pad = (k - 1) // 2
-        conv1 = nn.Conv2d(self.n_panels, n_list[0] * self.n_panels, k, groups=self.n_panels, stride=(4, 8))
-        norm1 = torch.nn.GroupNorm(self.n_panels, n_list[0] * self.n_panels)
-        conv2 = nn.Conv2d(n_list[0] * self.n_panels, n_list[1] * self.n_panels, k, groups=self.n_panels, stride=(8, 8))
-        norm2 = torch.nn.GroupNorm(self.n_panels, n_list[1] * self.n_panels)
-        conv3 = nn.Conv2d(n_list[1] * self.n_panels, n_list[2] * self.n_panels, k, groups=self.n_panels, stride=(5, 6))
-        norm3 = torch.nn.GroupNorm(self.n_panels, n_list[2] * self.n_panels)
+        n_arr = np.array([1] + n_list + [1])
+        k_arr = np.array(k_list)
+        n_params = np.sum((n_arr[:-1] * k_arr ** 2 + 1) * n_arr[1:]) # total number of parameters for each panel
+        channels_list = [n_features // (2 ** i) for i in range(n_layers)][::-1] # expand number of channels logarithmically
+        conv1 = nn.Conv2d(self.n_panels, channels_list[0] * self.n_panels, k, groups=self.n_panels, stride=(4, 8))
+        norm1 = torch.nn.GroupNorm(self.n_panels, channels_list[0] * self.n_panels)
+        conv2 = nn.Conv2d(channels_list[0] * self.n_panels, channels_list[1] * self.n_panels, k, groups=self.n_panels, stride=(8, 8))
+        norm2 = torch.nn.GroupNorm(self.n_panels, channels_list[1] * self.n_panels)
+        conv3 = nn.Conv2d(channels_list[1] * self.n_panels, channels_list[2] * self.n_panels, k, groups=self.n_panels, stride=(5, 6))
+        norm3 = torch.nn.GroupNorm(self.n_panels, channels_list[2] * self.n_panels)
         encoder = nn.Sequential(conv1, norm1, NL,
                                 conv2, norm2, NL,
                                 conv3, norm3, NL
                                 )
-        linear_layer = nn.Linear(n_list[-1], n_list[-1])
+        linear_layer = nn.Linear(n_features, n_params) # one-layer linear decoder
         return encoder, linear_layer
 
-    def use_encoder(self, x):
-        # k = 3
-        k = self.k_ada_filter
-        N = x.size(0)
-        filters_bias = self.linear_layer(self.encoder(x).view(N * self.n_panels, -1))
-        filters = filters_bias[:, :-1].view(N * self.n_panels, 1, k, k)
-        bias = filters_bias[:, -1:].view(-1)
-        return filters, bias
+    def use_encoder(self, x, k_list, n_list):
+        N, h, w = x.size(0), x.size(2), x.size(3)
+        # the filtering will be panel-dependent AND experiment-dependent
+        filtered_x = x.view(1, -1, h, w)
+        n_arr = np.array([1] + n_list + [1])
+        k_arr = np.array(k_list)
+
+        weight_bias = self.linear_layer(self.encoder(x).view(N * self.n_panels, -1))
+        idx_beg = 0
+        for i in range(k_list):
+            # Prepare filters
+            n_param = (n_arr[i] * k_arr[i] ** 2 + 1) * n_arr[i+1]
+            weight = weight_bias[:, idx_beg:idx_beg+n_param-1].view(N * self.n_panels * n_arr[i+1], n_arr[i], k_arr[i], k_arr[i])
+            bias = weight_bias[:, idx_beg+n_param-1:idx_beg+n_param].view(N * self.n_panels * n_arr[i+1],)
+            idx_beg += n_param
+            #
+            pad = (k_arr[i] - 1) // 2
+            filtered_x = nn.ReflectionPad2d(pad)(filtered_x)
+            filtered_x = nn.functional.conv2d(filtered_x, weight, bias=bias, groups=N * self.n_panels)
+        return filtered_x
 
     def forward(self, x, return_intermediate_act=False):
-        N, h, w = x.size(0), x.size(2), x.size(3)
+        h, w = x.size(2), x.size(3)
         if self.adaptive_filtering:
-            filters, bias = self.use_encoder(x)
-            # the filtering will be panel-dependent AND experiment-dependent
-            filtered_x = x.view(1, -1, h, w)
-            pad = (self.k_ada_filter - 1) // 2
-            filtered_x = nn.ReflectionPad2d(pad)(filtered_x)
-            filtered_x = nn.functional.conv2d(filtered_x, filters, bias=bias, groups=N*self.n_panels)
+            filtered_x = self.use_encoder(x, self.k_ada_filter, self.n_ada_filter)
         else:
             filtered_x = self.pd_filtering(x)
-        # generic peak finiding is panel/experiment-independent
+        # generic peak finding is panel/experiment-independent
         filtered_x = filtered_x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
         if self.residual:
