@@ -99,7 +99,7 @@ class AdaFilter_1(nn.Module):
 
         weight_bias = self.linear_layer(self.encoder(x).view(N * self.n_panels, -1))
         idx_beg = 0
-        for i in range(k_list):
+        for i in range(len(k_list)):
             # Prepare filters
             n_param = (n_arr[i] * k_arr[i] ** 2 + 1) * n_arr[i+1]
             weight = weight_bias[:, idx_beg:idx_beg+n_param-1].view(N * self.n_panels * n_arr[i+1], n_arr[i], k_arr[i], k_arr[i])
