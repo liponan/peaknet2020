@@ -36,7 +36,7 @@ class AdaFilter_1(nn.Module):
         # Generic Peak Finding
         k_list = [3, 3]
         n_list = [6]
-        NL_list = [nn.ReLU()]
+        NL_list = [nn.ReLU(), nn.ReLU()]
         self.residual = True
         #
         in_list = [1] + n_list
