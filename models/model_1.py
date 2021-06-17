@@ -36,7 +36,7 @@ class AdaFilter_1(nn.Module):
         # Generic Peak Finding
         k_list = [3]
         n_list = []
-        NL_list = [nn.Tanh()]
+        NL_list = [nn.Tanh()] # removed for now
         self.residual = False
         #
         in_list = [1] + n_list
@@ -47,8 +47,7 @@ class AdaFilter_1(nn.Module):
             conv = nn.Conv2d(in_list[i], out_list[i], k_list[i])
             layers.append(nn.Sequential(nn.ReflectionPad2d(pad_list[i]),
                                            conv,
-                                           nn.BatchNorm2d(out_list[i]),
-                                           NL_list[i]))
+                                           nn.BatchNorm2d(out_list[i])))
         self.gen_peak_finding = nn.Sequential(*layers)
 
         # Panel-Dependent Scaling
