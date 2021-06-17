@@ -90,7 +90,7 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
 def show_inter_act(writer, img_vis, total_steps, params, device, model):
     print("*** INTERMEDIATE ACTIVATIONS ***")
 
-    panels = [0]
+    panels = [0, 4]
 
     h, w = img_vis.size(1), img_vis.size(2)
     x = img_vis.view(1, -1, h, w).to(device)
