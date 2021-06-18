@@ -33,7 +33,7 @@ def train(model, device, params, writer):
 
     print("*** Parameters ***")
     for key, value in params.items():
-        print(key, ' : ', value)
+        print(str(key) + ' : ' + str(value))
 
     print('')
     print("Will show intermediate activation: ") + str(hasattr(model, 'can_show_inter_act') and model.can_show_inter_act)
@@ -148,7 +148,7 @@ def parse_args():
     p.add_argument("params", type=str, default=None, help="A json file")
 
     # System parameters
-    p.add_argument("--gpu", "-g", type=int, default=None, help="Use GPU x")
+    p.add_argument("--gpu", "-g", type=int, default=0, help="Use GPU x")
 
     # Existing model
     p.add_argument("--model", "-m", type=str, default=None, help="A .PT file")
@@ -158,7 +158,7 @@ def parse_args():
     p.add_argument("--pos_weight", type=float, default=1e-2)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
-    p.add_argument("--n_per_run", type=int, default=50000)
+    p.add_argument("--n_per_run", type=int, default=-1)
     p.add_argument('--confirm_delete', dest='confirm_delete', action='store_true')
     p.add_argument('--no_confirm_delete', dest='confirm_delete', action='store_false')
     p.set_defaults(confirm_delete=False)
