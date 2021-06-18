@@ -44,7 +44,7 @@ def train(model, device, params, writer):
 
     saver = Saver(params["saver_type"], params)
 
-    train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=True, n=params["n_experiments"])
+    train_dataset = PSANADataset(params["run_dataset_path"], subset="train", shuffle=False, n=params["n_experiments"])
     optimizer = optim.Adam(model.parameters(), lr=params["lr"], weight_decay=params["weight_decay"])
     # print("train_dataset", len(train_dataset))
 
