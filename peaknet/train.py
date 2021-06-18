@@ -128,7 +128,8 @@ def train(model, device, params, writer):
                         visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device,
                                                            model, use_indexed_peaks=params["use_indexed_peaks"])
                         # visualize.show_weights_model(writer, model, total_steps)
-                        # visualize.show_inter_act(writer, img_vis, total_steps, params, device, model)
+                        if params["show_inter_act"]:
+                            visualize.show_inter_act(writer, img_vis, total_steps, params, device, model)
             psana_images.close()
     saver.save(params["save_name"])
     torch.save(model, "debug/"+params["experiment_name"]+"/model.pt")
@@ -147,7 +148,7 @@ def parse_args():
 
     # Parameters not in params.json (can be easily modified when calling train.py)
     p.add_argument("--experiment_name", type=str, default=None)
-    p.add_argument("--pos_weight", type=float, default=1e-1)
+    p.add_argument("--pos_weight", type=float, default=1e-2)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--n_per_run", type=int, default=50000)
@@ -159,9 +160,10 @@ def parse_args():
     p.add_argument("--backup_every", type=int, default=500)
     p.add_argument("--print_every", type=int, default=25)
     p.add_argument("--upload_every", type=int, default=10)
-    p.add_argument("--min_det_peaks", type=int, default=10)
+    p.add_argument("--min_det_peaks", type=int, default=100)
     p.add_argument("--n_epochs", type=int, default=50)
     p.add_argument("--use_indexed_peaks", type=str, default="True")
+    p.add_argument("--show_inter_act", type=str, default="True")
     return p.parse_args()
 
 def load_model(params):
@@ -214,6 +216,10 @@ def main():
         params["use_indexed_peaks"] = True
     else:
         params["use_indexed_peaks"] = False
+    if args.show_inter_act == "True":
+        params["show_inter_act"] = True
+    else:
+        params["show_inter_act"] = False
 
     model = model.to(device)
 

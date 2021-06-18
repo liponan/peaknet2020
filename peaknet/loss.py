@@ -56,7 +56,8 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         super(PeakNetBCE1ChannelLoss, self).__init__()
         self.use_indexed_peaks = use_indexed_peaks
         if use_indexed_peaks:
-            self.maxpool_idxg = nn.MaxPool2d(7, stride=1, padding=3)
+            self.maxpool_idxg = nn.Sequential(nn.ReflectionPad2d(3),
+                                              nn.MaxPool2d(7, stride=1, padding=0))
         self.bceloss = None
         self.maxpool = nn.Sequential(nn.ReflectionPad2d(1),
                                      nn.MaxPool2d(3, stride=1, padding=0))
@@ -66,16 +67,14 @@ class PeakNetBCE1ChannelLoss(nn.Module):
 
     def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
         if self.use_indexed_peaks:
-            peak_finding = targets[:, 0, :, :].reshape(-1)
-            indexing = self.maxpool(targets)[:, 1, :, :].reshape(-1)
-            peak_finding_mask = peak_finding
-            indexing_mask = indexing
+            peak_finding_mask = targets[:, 0, :, :].reshape(-1)
+            indexing_mask = self.maxpool_idxg(targets)[:, 1, :, :].reshape(-1)
             rejected_mask = (peak_finding_mask + indexing_mask) % 2 # A XOR B
-            intersection_mask = peak_finding_mask * indexing_mask # A and B
-            exclusion_mask = (1 - peak_finding_mask) * (1 - indexing_mask) # not A and not B
-            union_mask = peak_finding_mask + indexing_mask - intersection_mask
+            intersection_mask = peak_finding_mask * indexing_mask # A AND B
+            exclusion_mask = (1 - peak_finding_mask) * (1 - indexing_mask) # not A AND not B
+            union_mask = peak_finding_mask + indexing_mask - intersection_mask # A OR B
             scores_filtered = scores[:, 0, :, :].reshape(-1)
-            scores_filtered[rejected_mask > 0.5] = -1e9
+            scores_filtered[rejected_mask > 0.5] = -1e9 # predictions in A XOR B are artificially removed
 
             pos_weight = self.pos_weight * exclusion_mask.sum().double() / intersection_mask.sum().double()
             self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
