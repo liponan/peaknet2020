@@ -87,7 +87,12 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                 positives = (nn.Sigmoid()(scores_c) > cutoff)
                 n_p = positives.sum()
                 n_tp_recall = (positives * intersection_mask).sum()
-                n_tp_prec = (positives * union_mask).sum()
+                # maxpool for peak finding for precision only
+                peak_finding_mask_mp = self.maxpool(targets)[:, 0, :, :].reshape(-1)
+                intersection_mask_mp = peak_finding_mask_mp * indexing_mask
+                union_mask_mp = peak_finding_mask_mp + indexing_mask - intersection_mask_mp
+                #
+                n_tp_prec = (positives * union_mask_mp).sum()
                 recall = float(n_tp_recall) / max(1, int(n_pos_gt))
                 precision = float(n_tp_prec) / max(1, int(n_p))
             metrics = {"loss": loss, "recall": recall, "precision": precision, "n_pos_gt": n_pos_gt.item(), "n_neg_gt": n_neg_gt.item()}

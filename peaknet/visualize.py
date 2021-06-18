@@ -51,7 +51,7 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         elif params["n_classes"] == 1:
             plt.plot(indices_nonzero[:, 1] - .5,
                      indices_nonzero[:, 0] - .5,
-                     'rs', markerfacecolor='none', markersize=5, markeredgewidth=2.0, alpha=.8)
+                     'rs', markerfacecolor='none', markersize=5, markeredgewidth=2.0, alpha=.8, label="model")
         else:
             print("Unrecognized number of classes for visualization.")
 
@@ -66,7 +66,7 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
         elif params["n_classes"] == 1:
             plt.plot(indices_nonzero[:, 1] - .5,
                      indices_nonzero[:, 0] - .5,
-                     'gs', markerfacecolor='none', markersize=10, markeredgewidth=2.0, alpha=.8)
+                     'gs', markerfacecolor='none', markersize=10, markeredgewidth=2.0, alpha=.8, label="psocake")
         else:
             print("Unrecognized number of classes for visualization.")
 
@@ -76,9 +76,10 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
             if params["n_classes"] == 1:
                 plt.plot(indices_nonzero[:, 1] - .5,
                          indices_nonzero[:, 0] - .5,
-                         'mo', markerfacecolor='none', markersize=10, markeredgewidth=2.0, alpha=.8)
+                         'mo', markerfacecolor='none', markersize=10, markeredgewidth=2.0, alpha=.8, label="indexing")
             else:
                 print("Unrecognized number of classes for visualization.")
+        plt.legend(loc="best")
 
         plt.subplot(212)
         plt.imshow(img_vis[i], cmap='Blues')
