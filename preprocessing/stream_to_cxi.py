@@ -83,6 +83,10 @@ def main():
     print("The detector is unknown.")
     print("Default detector " + default_detector + " will be used.")
 
+    original_cxi = args.filename.split('.')[0] + '.cxi'
+    f_cxi = h5py.File(original_cxi, "r")
+    event_idx_to_number = f_cxi["LCLS/eventNumber"][()]
+
     save_dir = args.filename.split('.')[0] + '_peak_finding_and_indexing'
     print("Saving directory: " + save_dir)
 
@@ -113,7 +117,7 @@ def main():
         print("Writing cxi file " + str(idx_cxi + 1) + "/" + str(n_cxi_files) + "...")
         name_cxi = 'file_' + str(idx_cxi) + '.cxi'
         print("Name: " + name_cxi)
-        cxi_file = h5py.File(save_dir + '/' +name_cxi, 'w')
+        cxi_file = h5py.File(save_dir + '/' + name_cxi, 'w')
 
         event_numbers = []
         LCLS = cxi_file.create_group('LCLS')
@@ -134,8 +138,8 @@ def main():
             # print("List " + str(idx_list))
             idx_stream = idx_cxi * args.events_per_cxi + idx_list
 
-            event_number = get_event_number(extract, idx_stream)
-            event_numbers.append(event_number)
+            event_idx = get_event_number(extract, idx_stream)
+            event_numbers.append(event_idx_to_number[event_idx])
             nPeaks = get_nPeaks(extract, idx_stream)
             if nPeaks > max_n_peaks:
                 nPeaks = max_n_peaks

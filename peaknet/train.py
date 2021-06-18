@@ -161,7 +161,7 @@ def parse_args():
     p.add_argument("--upload_every", type=int, default=10)
     p.add_argument("--min_det_peaks", type=int, default=10)
     p.add_argument("--n_epochs", type=int, default=50)
-    p.add_argument("--use_indexed_peaks", type=str, default="False")
+    p.add_argument("--use_indexed_peaks", type=str, default="True")
     return p.parse_args()
 
 def load_model(params):
