@@ -3,6 +3,7 @@ import numpy as np
 class Saver():
     def __init__(self, saver_type, params):
         self.saver_type = saver_type
+        print('')
         if saver_type == "precision_recall":
             print("Precision and recall will be saved in saved_outputs directory.")
             self.content = {"params": params, "precision": [], "recall": [], "loss": []}

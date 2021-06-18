@@ -30,8 +30,13 @@ def train(model, device, params, writer):
     model.train()
 
     print("")
-    print("Use indexing: " + str(params["use_indexed_peaks"]))
-    print("")
+
+    print("*** Parameters ***")
+    for key, value in params:
+        print(key, ' : ', value)
+
+    print('')
+    print("Will show intermediate activation: ") + str(hasattr(model, 'can_show_inter_act') and model.can_show_inter_act)
 
     if params["n_classes"] == 3:
         # outdated
@@ -57,9 +62,11 @@ def train(model, device, params, writer):
                                   n_classes = params["n_classes"])
     idx_event_visualization = len(psana_images_vis) // 2
     img_vis, target_vis, _ = psana_images_vis[idx_event_visualization]
+    print('')
     print("nPeaks visualization: " + str(len(np.nonzero(target_vis[:, 0, :, :]))))
     if params["use_indexed_peaks"]:
         print("nIndexedPeaks visualization: " + str(len(np.nonzero(target_vis[:, 1, :, :]))))
+
 
     total_steps = 0
     seen = 0
@@ -128,7 +135,7 @@ def train(model, device, params, writer):
                         visualize.show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, device,
                                                            model, use_indexed_peaks=params["use_indexed_peaks"])
                         # visualize.show_weights_model(writer, model, total_steps)
-                        if params["show_inter_act"]:
+                        if hasattr(model, 'can_show_inter_act') and model.can_show_inter_act:
                             visualize.show_inter_act(writer, img_vis, total_steps, params, device, model)
             psana_images.close()
     saver.save(params["save_name"])
@@ -163,7 +170,6 @@ def parse_args():
     p.add_argument("--min_det_peaks", type=int, default=100)
     p.add_argument("--n_epochs", type=int, default=50)
     p.add_argument("--use_indexed_peaks", type=str, default="True")
-    p.add_argument("--show_inter_act", type=str, default="True")
     return p.parse_args()
 
 def load_model(params):
@@ -216,10 +222,6 @@ def main():
         params["use_indexed_peaks"] = True
     else:
         params["use_indexed_peaks"] = False
-    if args.show_inter_act == "True":
-        params["show_inter_act"] = True
-    else:
-        params["show_inter_act"] = False
 
     model = model.to(device)
 
@@ -228,12 +230,14 @@ def main():
     if os.path.exists(model_dir):
         y = 'y'
         if args.confirm_delete:
+            print('')
             val = input("The model directory %s exists. Overwrite? (y/n)" % model_dir)
         else:
             val = 'y'
 
         if val == 'y':
             shutil.rmtree(model_dir)
+            print('')
             print(params["experiment_name"] + " directory removed.")
 
     os.makedirs(model_dir)

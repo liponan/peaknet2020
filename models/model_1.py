@@ -9,6 +9,7 @@ class AdaFilter_1(nn.Module):
         super(AdaFilter_1, self).__init__()
         n_panels = 32
         self.n_panels = n_panels
+        self.can_show_inter_act = True
 
         # Panel-dependent Filtering
         k_list = [3, 3]
