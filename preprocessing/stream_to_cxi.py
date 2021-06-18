@@ -67,7 +67,7 @@ def get_fs_ss_panel(extract, idx_stream, nIndexedPeaks):
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--filename", "-f", type=str, required=True, help="Path to .stream file")
-    p.add_argument("--events_per_cxi", type=int, default=20000, help="Number of events per .cxi file")
+    p.add_argument("--events_per_cxi", type=int, default=1000, help="Number of events per .cxi file")
     p.add_argument("--max_n_peaks", type=int, default=2048, help="Maximum number of peaks (for peak finding)")
     p.add_argument("--max_n_indexed_peaks", type=int, default=2048, help="Maximum number of peaks (for indexing)")
     p.add_argument("--default_detector", type=str, default="CxiDs1.0:Cspad.0", help="Default detector type")
@@ -83,15 +83,13 @@ def main():
     print("The detector is unknown.")
     print("Default detector " + default_detector + " will be used.")
 
-    original_cxi = args.filename.split('.')[0] + '.cxi'
-    f_cxi = h5py.File(original_cxi, "r")
-    event_idx_to_number = f_cxi["LCLS/eventNumber"][()]
-
+    print('')
     save_dir = args.filename.split('.')[0] + '_peak_finding_and_indexing'
     print("Saving directory: " + save_dir)
 
     if os.path.exists(save_dir):
         y = 'y'
+        print('')
         val = input("The saving directory exists. Overwrite? (y/n)")
         if val == 'y':
             shutil.rmtree(save_dir)
@@ -101,6 +99,7 @@ def main():
 
     os.makedirs(save_dir)
 
+    print('')
     print("Reading stream file...")
 
     extract = iStream()
@@ -111,6 +110,12 @@ def main():
     print("Number of reflection lists in stream: " + str(len(extract.label.index)))
     n_cxi_files = len(extract.label.index) // args.events_per_cxi #some events are removed here
     # n_cxi_files = 1
+
+    print('')
+    print("Reading original cxi file...")
+    original_cxi = args.filename.split('.')[0] + '.cxi'
+    f_cxi = h5py.File(original_cxi, "r")
+    event_idx_to_number = f_cxi["LCLS/eventNumber"][()]
 
     for idx_cxi in range(n_cxi_files):
         print('')
@@ -188,6 +193,7 @@ def main():
         cxi_file.close()
         print(name_cxi + " closed.")
 
+    print('')
     print("Preprocessing done.")
 
 if __name__ == "__main__":
