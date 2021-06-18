@@ -16,6 +16,7 @@ class AdaFilter_1(nn.Module):
         n_list = [16]
         NL = nn.LeakyReLU()
         self.adaptive_filtering = True
+        self.adaptive_residual = True
         #
         if not self.adaptive_filtering:
             in_list = [n_panels] + n_list
@@ -35,9 +36,9 @@ class AdaFilter_1(nn.Module):
             self.n_ada_filter = n_list
 
         # Generic Peak Finding
-        k_list = [5, 5, 5]
-        n_list = [6, 6]
-        NL_list = [nn.ReLU(), nn.ReLU(), nn.ReLU()]
+        k_list = [5, 5]
+        n_list = [6]
+        NL_list = [nn.ReLU()] * len(k_list)
         self.residual = True
         #
         in_list = [1] + n_list
@@ -79,11 +80,11 @@ class AdaFilter_1(nn.Module):
         n_params = np.sum((n_arr[:-1] * k_arr ** 2 + 1) * n_arr[1:]) # total number of parameters for each panel
         channels_list = [n_features // (2 ** i) for i in range(n_layers)][::-1] # expand number of channels logarithmically
         conv1 = nn.Conv2d(self.n_panels, channels_list[0] * self.n_panels, k, groups=self.n_panels, stride=(4, 8))
-        norm1 = torch.nn.GroupNorm(self.n_panels, channels_list[0] * self.n_panels)
+        norm1 = nn.GroupNorm(self.n_panels, channels_list[0] * self.n_panels)
         conv2 = nn.Conv2d(channels_list[0] * self.n_panels, channels_list[1] * self.n_panels, k, groups=self.n_panels, stride=(8, 8))
-        norm2 = torch.nn.GroupNorm(self.n_panels, channels_list[1] * self.n_panels)
+        norm2 = nn.GroupNorm(self.n_panels, channels_list[1] * self.n_panels)
         conv3 = nn.Conv2d(channels_list[1] * self.n_panels, channels_list[2] * self.n_panels, k, groups=self.n_panels, stride=(5, 6))
-        norm3 = torch.nn.GroupNorm(self.n_panels, channels_list[2] * self.n_panels)
+        norm3 = nn.GroupNorm(self.n_panels, channels_list[2] * self.n_panels)
         encoder = nn.Sequential(conv1, norm1, NL,
                                 conv2, norm2, NL,
                                 conv3, norm3, NL
@@ -92,6 +93,8 @@ class AdaFilter_1(nn.Module):
         return encoder, linear_layer
 
     def use_encoder(self, x, k_list, n_list):
+        NL = nn.LeakyReLU()
+        #
         N, h, w = x.size(0), x.size(2), x.size(3)
         # the filtering will be panel-dependent AND experiment-dependent
         filtered_x = x.view(1, -1, h, w)
@@ -111,6 +114,7 @@ class AdaFilter_1(nn.Module):
             pad = (k_arr[i] - 1) // 2
             filtered_x = nn.ReflectionPad2d(pad)(filtered_x)
             filtered_x = nn.functional.conv2d(filtered_x, weight, bias=bias, groups=N * self.n_panels)
+            filtered_x = NL(filtered_x)
         return filtered_x
 
     def forward(self, x, return_intermediate_act=False):
@@ -121,6 +125,8 @@ class AdaFilter_1(nn.Module):
             filtered_x = self.pd_filtering(x)
         # generic peak finding is panel/experiment-independent
         filtered_x = filtered_x.view(-1, 1, h, w)
+        if self.adaptive_residual:
+            filtered_x += x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
         if self.residual:
             logits += filtered_x

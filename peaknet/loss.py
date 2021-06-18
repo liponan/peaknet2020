@@ -74,7 +74,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             exclusion_mask = (1 - peak_finding_mask) * (1 - indexing_mask) # not A AND not B
             union_mask = peak_finding_mask + indexing_mask - intersection_mask # A OR B
             scores_filtered = scores[:, 0, :, :].reshape(-1)
-            scores_filtered[rejected_mask > 0.5] = -1e9 # predictions in A XOR B are artificially removed
+            scores_filtered[rejected_mask > 0.5] = -1e3 # predictions in A XOR B are artificially removed for the loss computation
 
             pos_weight = self.pos_weight * exclusion_mask.sum().double() / intersection_mask.sum().double()
             self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
