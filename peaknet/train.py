@@ -32,7 +32,7 @@ def train(model, device, params, writer):
     print("")
 
     print("*** Parameters ***")
-    for key, value in params:
+    for key, value in params.items():
         print(key, ' : ', value)
 
     print('')
