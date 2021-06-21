@@ -52,6 +52,8 @@ class AdaFilter_1(nn.Module):
                                         nn.BatchNorm2d(out_list[i]),
                                         NL_list[i]))
         self.gen_peak_finding = nn.Sequential(*layers)
+        if self.residual:
+            self.combination_layer = nn.Conv2d(2, 1, 1)
 
         # Panel-Dependent Scaling
         k_list = []
@@ -79,17 +81,23 @@ class AdaFilter_1(nn.Module):
         k_arr = np.array(k_list)
         n_params = np.sum((n_arr[:-1] * k_arr ** 2 + 1) * n_arr[1:]) # total number of parameters for each panel
         channels_list = [n_features // (2 ** i) for i in range(n_layers)][::-1] # expand number of channels logarithmically
-        conv1 = nn.Conv2d(self.n_panels, channels_list[0] * self.n_panels, k, groups=self.n_panels, stride=(4, 8))
+        conv1 = nn.Conv2d(self.n_panels, channels_list[0] * self.n_panels, k, groups=self.n_panels)
+        pool1 = nn.AvgPool2d((4, 8))
         norm1 = nn.GroupNorm(self.n_panels, channels_list[0] * self.n_panels)
-        conv2 = nn.Conv2d(channels_list[0] * self.n_panels, channels_list[1] * self.n_panels, k, groups=self.n_panels, stride=(8, 8))
+        conv2 = nn.Conv2d(channels_list[0] * self.n_panels, channels_list[1] * self.n_panels, k, groups=self.n_panels)
+        pool2 = nn.AvgPool2d((8, 8))
         norm2 = nn.GroupNorm(self.n_panels, channels_list[1] * self.n_panels)
-        conv3 = nn.Conv2d(channels_list[1] * self.n_panels, channels_list[2] * self.n_panels, k, groups=self.n_panels, stride=(5, 6))
+        pool3 = nn.AvgPool2d((5, 6))
+        conv3 = nn.Conv2d(channels_list[1] * self.n_panels, channels_list[2] * self.n_panels, k, groups=self.n_panels)
         norm3 = nn.GroupNorm(self.n_panels, channels_list[2] * self.n_panels)
-        encoder = nn.Sequential(conv1, norm1, NL,
-                                conv2, norm2, NL,
-                                conv3, norm3, NL
+        encoder = nn.Sequential(conv1, pool1, norm1, NL,
+                                conv2, pool2, norm2, NL,
+                                conv3, pool3, norm3, NL
                                 )
-        linear_layer = nn.Linear(n_features, n_params) # one-layer linear decoder
+        n_features_inter = int(np.sqrt(n_features * n_params))
+        linear_layer = nn.Sequential(nn.Linear(n_features, n_features_inter),
+                                     nn.LeakyReLU(),
+                                     nn.Linear(n_features_inter, n_params)) # two-layer linear decoder
         return encoder, linear_layer
 
     def use_encoder(self, x, k_list, n_list):
@@ -129,7 +137,7 @@ class AdaFilter_1(nn.Module):
             filtered_x += x.view(-1, 1, h, w)
         logits = self.gen_peak_finding(filtered_x)
         if self.residual:
-            logits += filtered_x
+            logits = self.combination_layer(torch.cat((filtered_x, logits), 1))
         # panel-dependent scaling
         panel_logits = logits.view(-1 , 32, h, w)
         panel_logits = self.pd_scaling(panel_logits)
