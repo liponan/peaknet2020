@@ -89,11 +89,6 @@ class AdaFilter_1(nn.Module):
         stride_size_w = int(w ** (1. / float(n_layers)))
         s1_h, s2_h, s1_w, s2_w = stride_size_h, stride_size_h, stride_size_w, stride_size_w
         s3_h, s3_w = (h // stride_size_h) // stride_size_h, (w // stride_size_w) // stride_size_w
-        print("Stride Sizes:")
-        print(h)
-        print(s1_h, s2_h, s3_h)
-        print(w)
-        print(s1_w, s2_w, s3_w)
         #
         n_arr = np.array([1] + n_list + [1])
         k_arr = np.array(k_list)
