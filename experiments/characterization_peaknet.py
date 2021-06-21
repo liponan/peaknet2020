@@ -18,7 +18,8 @@ if index_experiment == 1:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params_model_1.json --saver_type "precision_recall"'
-                  ' --n_experiments 1 --n_per_run 1 --n_epochs 1 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
+                  ' --n_experiments 1 --n_per_run 1 --n_epochs 1 --show_image_every 1000'
+                  ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
     offset_idx = 0
     prefix = "pos_weight_unet_"
@@ -29,5 +30,6 @@ if index_experiment == 1:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
-                  ' --n_experiments 1 --n_per_run 1 --n_epochs 1 --save_name ' + str(save_name) + ' --pos_weight ' + str(
+                  ' --n_experiments 1 --n_per_run 1 --n_epochs 1 --show_image_every 1000'
+                  ' --save_name ' + str(save_name) + ' --pos_weight ' + str(
             pw))

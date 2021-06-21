@@ -61,6 +61,7 @@ def train(model, device, params, writer):
                                   use_indexed_peaks=params["use_indexed_peaks"],
                                   n_classes = params["n_classes"])
     idx_event_visualization = len(psana_images_vis) // 2
+    print('Loading image for visualization...')
     img_vis, target_vis, _ = psana_images_vis[idx_event_visualization]
     print('')
     print("nPeaks visualization: " + str(len(np.nonzero(target_vis[:, 0, :, :]))))
@@ -169,7 +170,7 @@ def parse_args():
     p.add_argument("--backup_every", type=int, default=500)
     p.add_argument("--print_every", type=int, default=25)
     p.add_argument("--show_image_every", type=int, default=100)
-    p.add_argument("--upload_every", type=int, default=10)
+    p.add_argument("--upload_every", type=int, default=100)
     p.add_argument("--min_det_peaks", type=int, default=100)
     p.add_argument("--n_epochs", type=int, default=3)
     p.add_argument("--use_indexed_peaks", type=str, default="True")
