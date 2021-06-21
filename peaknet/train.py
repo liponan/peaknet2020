@@ -173,7 +173,7 @@ def parse_args():
     p.add_argument("--min_det_peaks", type=int, default=100)
     p.add_argument("--n_epochs", type=int, default=50)
     p.add_argument("--use_indexed_peaks", type=str, default="True")
-    p.add_argument("--downsample", type=int, default=3)
+    p.add_argument("--downsample", type=int, default=1)
     p.add_argument("--num_workers", type=int, default=0)
     return p.parse_args()
 
