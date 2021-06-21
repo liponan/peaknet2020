@@ -30,6 +30,7 @@ def train(model, device, params, writer):
     model.train()
 
     print("")
+    print(params["downsample"])
 
     print("*** Parameters ***")
     for key, value in params.items():
