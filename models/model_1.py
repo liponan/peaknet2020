@@ -88,7 +88,7 @@ class AdaFilter_1(nn.Module):
         stride_size_h = int(h ** (1. / float(n_layers)))
         stride_size_w = int(w ** (1. / float(n_layers)))
         s1_h, s2_h, s1_w, s2_w = stride_size_h, stride_size_h, stride_size_w, stride_size_w
-        s3_h, s3_w = h // (stride_size_h ** 2), w // (stride_size_w ** 2)
+        s3_h, s3_w = (h // stride_size_h) // stride_size_h, (w // stride_size_w) // stride_size_w
         print("Stride Sizes:")
         print(h)
         print(s1_h, s2_h, s3_h)
@@ -99,6 +99,7 @@ class AdaFilter_1(nn.Module):
         k_arr = np.array(k_list)
         n_params = np.sum((n_arr[:-1] * k_arr ** 2 + 1) * n_arr[1:]) # total number of parameters for each panel
         channels_list = [n_features // (2 ** i) for i in range(n_layers)][::-1] # expand number of channels logarithmically
+        pad_layer = nn.ReflectionPad2d((k - 1) // 2)
         conv1 = nn.Conv2d(self.n_panels, channels_list[0] * self.n_panels, k, groups=self.n_panels)
         pool1 = nn.AvgPool2d((s1_h, s1_w))
         norm1 = nn.GroupNorm(self.n_panels, channels_list[0] * self.n_panels)
@@ -108,9 +109,9 @@ class AdaFilter_1(nn.Module):
         pool3 = nn.AvgPool2d((s3_h, s3_w))
         conv3 = nn.Conv2d(channels_list[1] * self.n_panels, channels_list[2] * self.n_panels, k, groups=self.n_panels)
         norm3 = nn.GroupNorm(self.n_panels, channels_list[2] * self.n_panels)
-        encoder = nn.Sequential(conv1, pool1, norm1, NL,
-                                conv2, pool2, norm2, NL,
-                                conv3, pool3, norm3, NL
+        encoder = nn.Sequential(pad_layer, conv1, pool1, norm1, NL,
+                                pad_layer, conv2, pool2, norm2, NL,
+                                pad_layer, conv3, pool3, norm3, NL
                                 )
         n_features_inter = int(np.sqrt(n_features * n_params))
         linear_layer = nn.Sequential(nn.Linear(n_features, n_features_inter),
