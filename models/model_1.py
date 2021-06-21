@@ -131,11 +131,11 @@ class AdaFilter_1(nn.Module):
         return filtered_x
 
     def forward(self, x, return_intermediate_act=False):
-        h, w = x.size(2), x.size(3)
         if self.downsample_bool:
             x_ds = self.downsampling(x)
         else:
             x_ds = x
+        h, w = x_ds.size(2), x_ds.size(3)
         if self.adaptive_filtering:
             filtered_x = self.use_encoder(x_ds, self.k_ada_filter, self.n_ada_filter)
         else:
