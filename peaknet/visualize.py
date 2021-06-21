@@ -31,7 +31,8 @@ def show_GT_prediction_image(writer, img_vis, target_vis, total_steps, params, d
     scores = model(x)
     scores = nn.Sigmoid()(scores).cpu().numpy()
     if model.downsample_bool:
-        img_vis = model.downsample_for_visualization(x).cpu().numpy().reshape(-1, h, w)
+        img_vis = model.downsample_for_visualization(x).cpu().numpy()
+        img_vis = img_vis.reshape(-1, img_vis.shape[2], img_vis.shape[3])
 
     for i in center_panels + top_left:
         panel_name = 'panel_'+str(i)
