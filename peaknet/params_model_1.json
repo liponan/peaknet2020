@@ -1,12 +1,4 @@
 {
-  "run_dataset_path": "/cds/home/a/axlevy/peaknet2020/data/cxic0415_psocake2.csv",
   "model": "model_1",
-  "verbose": false,
-  "lr": 0.01,
-  "weight_decay": 0,
-  "batch_size": 10,
-  "downsample": 1,
-  "num_workers": 0,
-  "show_image_every": 100,
-  "n_classes": 1
+  "batch_size": 10
 }

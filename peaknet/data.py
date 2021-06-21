@@ -108,13 +108,17 @@ class PSANAImage(Dataset):
             # img = img - np.mean(img)
             for i in range(img.shape[0]):
                 img[i] = img[i] / np.max(img[i])
-                img[i][img[i] == 0] = np.mean(img[i])
-        h_ds = int(np.ceil(img.shape[1] / float(self.downsample)))
-        w_ds = int(np.ceil(img.shape[2] / float(self.downsample)))
-        h_pad = int(h_ds * self.downsample)
-        w_pad = int(w_ds * self.downsample)
+        # h_ds = int(np.ceil(img.shape[1] / float(self.downsample)))
+        # w_ds = int(np.ceil(img.shape[2] / float(self.downsample)))
+        # h_pad = int(h_ds * self.downsample)
+        # w_pad = int(w_ds * self.downsample)
+        h = img.shape[1]
+        w = img.shape[2]
+        h_ds = int(img.shape[1] / float(self.downsample))
+        w_ds = int(img.shape[2] / float(self.downsample))
         if self.mode == "peaknet2020":
-            img_tensor = torch.zeros(img.shape[0], h_pad, w_pad)
+            # img_tensor = torch.zeros(img.shape[0], h_pad, w_pad)
+            img_tensor = torch.zeros(img.shape[0], h, w)
             img_tensor[:, 0:img.shape[1], 0:img.shape[2]] = torch.from_numpy(img)
             if self.use_indexed_peaks:
                 label_tensor = self.make_label_with_idxg(s, r, c, s_idxg, r_idxg, c_idxg, n_panels=img.shape[0], h=h_ds, w=w_ds)

@@ -10,6 +10,11 @@ class AdaFilter_1(nn.Module):
         n_panels = 32
         self.n_panels = n_panels
         self.can_show_inter_act = True
+        self.downsample_bool = params["downsample"] >= 2
+
+        # Downsampling
+        if self.downsample_bool:
+            self.downsampling = nn.MaxPool2d(params["downsample"])
 
         # Panel-dependent Filtering
         k_list = [3, 3]
@@ -127,10 +132,14 @@ class AdaFilter_1(nn.Module):
 
     def forward(self, x, return_intermediate_act=False):
         h, w = x.size(2), x.size(3)
-        if self.adaptive_filtering:
-            filtered_x = self.use_encoder(x, self.k_ada_filter, self.n_ada_filter)
+        if self.downsample_bool:
+            x_ds = self.downsampling(x)
         else:
-            filtered_x = self.pd_filtering(x)
+            x_ds = x
+        if self.adaptive_filtering:
+            filtered_x = self.use_encoder(x_ds, self.k_ada_filter, self.n_ada_filter)
+        else:
+            filtered_x = self.pd_filtering(x_ds)
         # generic peak finding is panel/experiment-independent
         filtered_x = filtered_x.view(-1, 1, h, w)
         if self.adaptive_residual:
@@ -143,6 +152,13 @@ class AdaFilter_1(nn.Module):
         panel_logits = self.pd_scaling(panel_logits)
         logits_out = panel_logits.view(-1, 1, h, w)
         if return_intermediate_act:
-            return x, filtered_x, logits, logits_out
+            return x_ds, filtered_x, logits, logits_out
         else:
             return logits_out
+
+    def downsample_for_visualization(self, x):
+        if self.downsample_bool:
+            x_ds = self.downsampling(x)
+        else:
+            x_ds = x
+        return x_ds

@@ -155,6 +155,10 @@ def parse_args():
 
     # Parameters not in params.json (can be easily modified when calling train.py)
     p.add_argument("--experiment_name", type=str, default=None)
+    p.add_argument("--run_dataset_path", type=str, default="/cds/home/a/axlevy/peaknet2020/data/cxic0415_psocake2.csv")
+    p.add_argument("--n_classes", type=int, default=1)
+    p.add_argument("--lr", type=float, default=1e-2)
+    p.add_argument("--weight_decay", type=float, default=0.)
     p.add_argument("--pos_weight", type=float, default=1e-1)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
@@ -166,10 +170,13 @@ def parse_args():
     p.add_argument("--save_name", type=str, default=None)
     p.add_argument("--backup_every", type=int, default=500)
     p.add_argument("--print_every", type=int, default=25)
+    p.add_argument("--show_image_every", type=int, default=100)
     p.add_argument("--upload_every", type=int, default=10)
     p.add_argument("--min_det_peaks", type=int, default=100)
     p.add_argument("--n_epochs", type=int, default=50)
     p.add_argument("--use_indexed_peaks", type=str, default="True")
+    p.add_argument("--downsample", type=int, default=3)
+    p.add_argument("--num_workers", type=int, default=0)
     return p.parse_args()
 
 def load_model(params):
@@ -207,6 +214,10 @@ def main():
         params["experiment_name"] = args.experiment_name
     else:
         params["experiment_name"] = params["model"]
+    params["run_dataset_path"] = args.run_dataset_path
+    params["n_classes"] = args.n_classes
+    params["lr"] = args.lr
+    params["weight_decay"] = args.weight_decay
     params["pos_weight"] = args.pos_weight
     params["cutoff"] = args.cutoff
     params["n_experiments"] = args.n_experiments
@@ -215,13 +226,17 @@ def main():
     params["save_name"] = args.save_name
     params["backup_every"] = args.backup_every
     params["print_every"] = args.print_every
+    params["show_image_every"] = args.show_image_every
     params["upload_every"] = args.upload_every
     params["min_det_peaks"] = args.min_det_peaks
+    params["downsample"] = args.downsample
+    params["num_workers"] = args.num_workers
     params["n_epochs"] = args.n_epochs
     if args.use_indexed_peaks == "True":
         params["use_indexed_peaks"] = True
     else:
         params["use_indexed_peaks"] = False
+    params["verbose"] = False
 
     model = model.to(device)
 

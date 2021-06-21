@@ -56,8 +56,8 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         super(PeakNetBCE1ChannelLoss, self).__init__()
         self.use_indexed_peaks = use_indexed_peaks
         if use_indexed_peaks:
-            self.maxpool_idxg = nn.Sequential(nn.ReflectionPad2d(3),
-                                              nn.MaxPool2d(7, stride=1, padding=0))
+            self.maxpool_idxg = nn.Sequential(nn.ReflectionPad2d(2),
+                                              nn.MaxPool2d(5, stride=1, padding=0))
         self.bceloss = None
         self.maxpool = nn.Sequential(nn.ReflectionPad2d(1),
                                      nn.MaxPool2d(3, stride=1, padding=0))
@@ -65,7 +65,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         if device is not None:
             self.pos_weight = self.pos_weight.to(device)
 
-    def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool=False):
+    def forward(self, scores, targets, cutoff=0.5, verbose=False, maxpool_gt=False, maxpool_prec=True):
         if self.use_indexed_peaks:
             peak_finding_mask = targets[:, 0, :, :].reshape(-1)
             indexing_mask = self.maxpool_idxg(targets)[:, 1, :, :].reshape(-1)
@@ -87,19 +87,21 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                 positives = (nn.Sigmoid()(scores_c) > cutoff)
                 n_p = positives.sum()
                 n_tp_recall = (positives * intersection_mask).sum()
-                # maxpool for peak finding for precision only
-                peak_finding_mask_mp = self.maxpool(targets)[:, 0, :, :].reshape(-1)
-                intersection_mask_mp = peak_finding_mask_mp * indexing_mask
-                union_mask_mp = peak_finding_mask_mp + indexing_mask - intersection_mask_mp
-                #
-                n_tp_prec = (positives * union_mask_mp).sum()
+                if maxpool_prec:
+                    # maxpool for peak finding for precision only
+                    peak_finding_mask_mp = self.maxpool(targets)[:, 0, :, :].reshape(-1)
+                    intersection_mask_mp = peak_finding_mask_mp * indexing_mask
+                    union_mask_mp = peak_finding_mask_mp + indexing_mask - intersection_mask_mp
+                    n_tp_prec = (positives * union_mask_mp).sum()
+                else:
+                    n_tp_prec = (positives * union_mask).sum()
                 recall = float(n_tp_recall) / max(1, int(n_pos_gt))
                 precision = float(n_tp_prec) / max(1, int(n_p))
             metrics = {"loss": loss, "recall": recall, "precision": precision, "n_pos_gt": n_pos_gt.item(), "n_neg_gt": n_neg_gt.item()}
             return metrics
 
         else:
-            if maxpool:
+            if maxpool_gt:
                 targets = self.maxpool(targets)
             scores_c = scores[:, 0, :, :].reshape(-1)
             targets_c = targets[:, 0, :, :].reshape(-1)
@@ -114,7 +116,10 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                 positives = (nn.Sigmoid()(scores_c) > cutoff)
                 n_p = positives.sum()
                 n_tp = (positives[gt_mask]).sum()
-                n_tp_prec = (positives[self.maxpool(targets)[:, 0, :, :].reshape(-1) > 0.5]).sum()
+                if maxpool_prec:
+                    n_tp_prec = (positives[self.maxpool(targets)[:, 0, :, :].reshape(-1) > 0.5]).sum()
+                else:
+                    n_tp_prec = n_tp
                 recall = float(n_tp) / max(1, int(n_gt))
                 precision = float(n_tp_prec) / max(1, int(n_p))
                 if verbose:
