@@ -36,7 +36,9 @@ class AdaFilter_1(nn.Module):
                                             NL))
             self.pd_filtering = nn.Sequential(*layers)
         else:
-            self.encoder, self.linear_layer = self.create_panel_to_filter_encoder(k_list, n_list)
+            h = 185 // params["downsample"]
+            w = 388 // params["downsample"]
+            self.encoder, self.linear_layer = self.create_panel_to_filter_encoder(k_list, n_list, h, w)
             self.k_ada_filter = k_list
             self.n_ada_filter = n_list
 
@@ -74,7 +76,7 @@ class AdaFilter_1(nn.Module):
                                         conv))
         self.pd_scaling = nn.Sequential(*layers)
 
-    def create_panel_to_filter_encoder(self, k_list, n_list):
+    def create_panel_to_filter_encoder(self, k_list, n_list, h, w):
         # h = 185 ~ 4 * 8 * 5, w = 388 ~ 8 * 8 * 6
         # k ** 2 = 9 -> 3, 6, 9 + 1 (bias) = 10
         NL = nn.ReLU()
@@ -82,17 +84,28 @@ class AdaFilter_1(nn.Module):
         n_layers = 3
         n_features = 8
         #
+        # Build stride sizes
+        stride_size_h = int(h ** (1 / n_features))
+        stride_size_w = int(w ** (1 / n_features))
+        s1_h, s2_h, s1_w, s2_w = stride_size_h, stride_size_h, stride_size_w, stride_size_w
+        s3_h, s3_w = h // (stride_size_h ** 2), w // (stride_size_w ** 2)
+        print("Stride Sizes:")
+        print(h)
+        print(s1_h, s2_h, s3_h)
+        print(w)
+        print(s1_w, s2_w, s3_w)
+        #
         n_arr = np.array([1] + n_list + [1])
         k_arr = np.array(k_list)
         n_params = np.sum((n_arr[:-1] * k_arr ** 2 + 1) * n_arr[1:]) # total number of parameters for each panel
         channels_list = [n_features // (2 ** i) for i in range(n_layers)][::-1] # expand number of channels logarithmically
         conv1 = nn.Conv2d(self.n_panels, channels_list[0] * self.n_panels, k, groups=self.n_panels)
-        pool1 = nn.AvgPool2d((4, 8))
+        pool1 = nn.AvgPool2d((s1_h, s1_w))
         norm1 = nn.GroupNorm(self.n_panels, channels_list[0] * self.n_panels)
         conv2 = nn.Conv2d(channels_list[0] * self.n_panels, channels_list[1] * self.n_panels, k, groups=self.n_panels)
-        pool2 = nn.AvgPool2d((8, 8))
+        pool2 = nn.AvgPool2d((s2_h, s2_w))
         norm2 = nn.GroupNorm(self.n_panels, channels_list[1] * self.n_panels)
-        pool3 = nn.AvgPool2d((5, 6))
+        pool3 = nn.AvgPool2d((s3_h, s3_w))
         conv3 = nn.Conv2d(channels_list[1] * self.n_panels, channels_list[2] * self.n_panels, k, groups=self.n_panels)
         norm3 = nn.GroupNorm(self.n_panels, channels_list[2] * self.n_panels)
         encoder = nn.Sequential(conv1, pool1, norm1, NL,
