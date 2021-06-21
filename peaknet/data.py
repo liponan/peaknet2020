@@ -64,9 +64,10 @@ class PSANAImage(Dataset):
             for j in range(len(my_r)):
                 u = int(np.floor(my_r[j] / float(self.downsample)))
                 v = int(np.floor(my_c[j] / float(self.downsample)))
-                label[i, 0, u, v] = 1
-                label[i, 1, u, v] = np.fmod(my_r[j] / float(self.downsample), 1.0) #
-                label[i, 2, u, v] = np.fmod(my_c[j] / float(self.downsample), 1.0)
+                if u < h and v < w:
+                    label[i, 0, u, v] = 1
+                    label[i, 1, u, v] = np.fmod(my_r[j] / float(self.downsample), 1.0) #
+                    label[i, 2, u, v] = np.fmod(my_c[j] / float(self.downsample), 1.0)
         return label
 
     def make_label_with_idxg(self, s, r, c, s_idxg, r_idxg, c_idxg, n_panels=32, h=24, w=49):
