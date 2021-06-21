@@ -100,6 +100,8 @@ def train(model, device, params, writer):
                 seen += n
                 seen_and_missed += n_trials.sum().item()
                 # y = y.view(-1, channels, h, w)
+                print('y')
+                print(y.shape)
                 x = x.to(device)
                 y = y.to(device)
 
