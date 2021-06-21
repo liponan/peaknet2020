@@ -85,8 +85,8 @@ class AdaFilter_1(nn.Module):
         n_features = 8
         #
         # Build stride sizes
-        stride_size_h = int(h ** (1. / float(n_features)))
-        stride_size_w = int(w ** (1. / float(n_features)))
+        stride_size_h = int(h ** (1. / float(n_layers)))
+        stride_size_w = int(w ** (1. / float(n_layers)))
         s1_h, s2_h, s1_w, s2_w = stride_size_h, stride_size_h, stride_size_w, stride_size_w
         s3_h, s3_w = h // (stride_size_h ** 2), w // (stride_size_w ** 2)
         print("Stride Sizes:")
