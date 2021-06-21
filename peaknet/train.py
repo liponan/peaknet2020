@@ -30,7 +30,6 @@ def train(model, device, params, writer):
     model.train()
 
     print("")
-    print(params["downsample"])
 
     print("*** Parameters ***")
     for key, value in params.items():
@@ -198,11 +197,6 @@ def load_model(params):
 def main():
     args = parse_args()
     params = json.load(open(args.params))
-    model = load_model(params)
-
-    # Existing model
-    if args.model:
-        model.load_state_dict(torch.load(args.model, map_location="cpu"))
 
     # System parameters
     if args.gpu is not None and torch.cuda.is_available():
@@ -238,6 +232,12 @@ def main():
     else:
         params["use_indexed_peaks"] = False
     params["verbose"] = False
+
+    model = load_model(params)
+
+    # Existing model
+    if args.model:
+        model.load_state_dict(torch.load(args.model, map_location="cpu"))
 
     model = model.to(device)
 
