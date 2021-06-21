@@ -98,7 +98,7 @@ def show_inter_act(writer, img_vis, total_steps, params, device, model):
     h, w = img_vis.size(1), img_vis.size(2)
     x = img_vis.view(1, -1, h, w).to(device)
     x_ds, filtered_x, logits, logits_out = model(x, return_intermediate_act=True)
-    x_ds = x_ds.cpu().numpy()
+    x_ds = x_ds.cpu().numpy().reshape(-1, 1, h, w)
     filtered_x = filtered_x.cpu().numpy()
     logits = logits.cpu().numpy()
     logits_out = logits_out.cpu().numpy()
