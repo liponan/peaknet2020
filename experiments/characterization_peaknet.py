@@ -96,4 +96,4 @@ if index_experiment == 5:
         os.system('python train.py params_model_1.json --saver_type "precision_recall"'
                   ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
                   ' --use_indexed_peaks True --use_adaptive_filtering True --use_focal_loss True'
-                  ' --use_scheduled_pos_weight True --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
+                  ' --use_scheduled_pos_weight True --lr 0.0001 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))

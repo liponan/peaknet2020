@@ -179,7 +179,7 @@ def parse_args():
     p.add_argument("--use_adaptive_filtering", type=str, default="True")
     p.add_argument("--use_scheduled_pos_weight", type=str, default="False")
     p.add_argument("--pos_weight_0", type=float, default=1e4)
-    p.add_argument("--annihilation_speed", type=float, default=1e-2)
+    p.add_argument("--annihilation_speed", type=float, default=5e-2)
     return p.parse_args()
 
 def load_model(params):
