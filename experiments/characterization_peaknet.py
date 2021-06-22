@@ -5,6 +5,8 @@ os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
 index_experiment = 5
 
+print("Index Experiment: " + str(index_experiment))
+
 # Experiment #1: peaknet and unet vs pos_weight
 if index_experiment == 1:
     pos_weight_list = [1e-3, 1e-4]
