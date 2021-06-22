@@ -97,8 +97,10 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             if self.use_focal_loss:
                 n_p = exclusion_mask.sum().double() / intersection_mask.sum().double() # different from BCE
                 scores_sigmoid = torch.clamp(nn.Sigmoid()(scores_filtered), min=1e-9, max=1.-1e-9)
-                loss = -(self.pos_weight * intersection_mask_filtered * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid) +
-                        (1. - intersection_mask_filtered) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).mean() * n_p
+                print((intersection_mask_filtered * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid)).mean().item())
+                print(((1. - intersection_mask_filtered) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).mean())
+                loss = -(self.pos_weight * (intersection_mask_filtered * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid)).mean() +
+                         ((1. - intersection_mask_filtered) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).mean()) * n_p
             else:
                 n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()
                 if self.gamma_bool:
