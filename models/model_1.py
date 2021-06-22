@@ -32,7 +32,7 @@ class AdaFilter_1(nn.Module):
                 conv = nn.Conv2d(in_list[i], out_list[i], k_list[i], groups=n_panels)
                 layers.append(nn.Sequential(nn.ReflectionPad2d(pad_list[i]),
                                             conv,
-                                            torch.nn.GroupNorm(n_panels, out_list[i]),
+                                            nn.GroupNorm(n_panels, out_list[i]),
                                             NL))
             self.pd_filtering = nn.Sequential(*layers)
         else:
