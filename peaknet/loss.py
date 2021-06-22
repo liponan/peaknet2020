@@ -66,7 +66,9 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         if use_focal_loss:
             print('')
             print("Will use focal loss.")
-        self.gamma_FL = torch.Tensor([gamma_FL])
+            self.gamma_FL = torch.Tensor([gamma_FL])
+            if device is not None:
+                self.gamma_FL = self.gamma_FL.to(device)
         self.gamma_bool = False
         if not use_focal_loss and np.abs(gamma - 1.) > 1e-3:
             print('')
