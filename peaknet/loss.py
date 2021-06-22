@@ -65,10 +65,9 @@ def update_schedule_pos_weight(pos_weight, pos_weight_inf, annihilation_speed):
 
 class PeakNetBCE1ChannelLoss(nn.Module):
 
-    def __init__(self, params):
+    def __init__(self, params, device):
         super(PeakNetBCE1ChannelLoss, self).__init__()
         pos_weight = params["pos_weight"]
-        device = params["device"]
         use_indexed_peaks = params["use_indexed_peaks"]
         gamma = params["gamma"]
         use_focal_loss = params["use_focal_loss"]

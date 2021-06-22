@@ -39,7 +39,7 @@ def train(model, device, params, writer):
     print("Will show intermediate activation: ") + str(hasattr(model, 'can_show_inter_act') and model.can_show_inter_act) + "."
 
     if params["n_classes"] == 1:
-        loss_func = PeakNetBCE1ChannelLoss(params).to(device)
+        loss_func = PeakNetBCE1ChannelLoss(params, device).to(device)
     else:
         print("Unrecognized number of classes for loss function.")
         return
