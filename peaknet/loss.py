@@ -90,22 +90,24 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             exclusion_mask = (1 - peak_finding_mask) * (1 - indexing_mask) # not A AND not B
             union_mask = peak_finding_mask + indexing_mask - intersection_mask # A OR B
             scores_filtered = scores[:, 0, :, :].reshape(-1)
-            scores_filtered[rejected_mask > 0.5] = -1e3 # predictions in A XOR B are artificially removed for the loss computation
+            # scores_filtered[rejected_mask > 0.5] = -1e3 # predictions in A XOR B are artificially removed for the loss computation
+            scores_filtered = scores_filtered[rejected_mask < 0.5]
+            intersection_mask_filtered = intersection_mask[rejected_mask < 0.5]
 
             if self.use_focal_loss:
                 n_p = 1 # different from BCE
                 scores_sigmoid = nn.Sigmoid()(scores_filtered)
                 print(torch.log(scores_sigmoid).sum())
                 print(torch.log(1. - scores_sigmoid).sum())
-                loss = (self.pos_weight * n_p * intersection_mask * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid) +
-                        (1. - intersection_mask) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).sum()
+                loss = -(self.pos_weight * n_p * intersection_mask_filtered * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid) +
+                        (1. - intersection_mask_filtered) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).sum()
             else:
                 n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()
                 if self.gamma_bool:
                     n_p = n_p ** self.gamma
                 pos_weight = self.pos_weight * n_p
                 self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-                loss = self.bceloss(scores_filtered, intersection_mask) / self.pos_weight
+                loss = self.bceloss(scores_filtered, intersection_mask_filtered) / self.pos_weight
 
             with torch.no_grad():
                 n_pos_gt = intersection_mask.sum()
