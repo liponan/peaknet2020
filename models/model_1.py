@@ -24,8 +24,8 @@ class AdaFilter_1(nn.Module):
         self.adaptive_residual = False # keep False because each panel should be scaled differently
         #
         if not self.adaptive_filtering:
-            in_list = [n_panels] + n_list
-            out_list = n_list + [n_panels]
+            in_list = [n_panels] + [n * n_panels for n in n_list]
+            out_list = [n * n_panels for n in n_list] + [n_panels]
             pad_list = [(k - 1) // 2 for k in k_list]
             layers = []
             for i in range(len(k_list)):

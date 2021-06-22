@@ -63,6 +63,9 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                                      nn.MaxPool2d(3, stride=1, padding=0))
         self.pos_weight = torch.Tensor([pos_weight])
         self.use_focal_loss = use_focal_loss
+        if use_focal_loss:
+            print('')
+            print("Will use focal loss.")
         self.gamma_FL = torch.Tensor([gamma_FL])
         self.gamma_bool = False
         if not use_focal_loss and np.abs(gamma - 1.) > 1e-3:
