@@ -232,6 +232,8 @@ def main():
     params["downsample"] = args.downsample
     params["num_workers"] = args.num_workers
     params["n_epochs"] = args.n_epochs
+    params["pos_weight_0"] = args.pos_weight_0
+    params["annihilation_speed"] = args.annihilation_speed
     if args.use_indexed_peaks == "True":
         params["use_indexed_peaks"] = True
     else:
@@ -246,8 +248,6 @@ def main():
         params["use_focal_loss"] = False
     if args.use_scheduled_pos_weight == "True":
         params["use_scheduled_pos_weight"] = True
-        params["pos_weight_0"] = args.pos_weight_0
-        params["annihilation_speed"] = args.annihilation_speed
     else:
         params["use_scheduled_pos_weight"] = False
     params["verbose"] = False
