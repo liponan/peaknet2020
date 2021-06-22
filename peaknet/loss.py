@@ -57,10 +57,25 @@ def focal_loss(scores, target, TN, alpha, gamma):
              ((1. - target) * scores_sigmoid ** gamma * torch.log(1. - scores_sigmoid)).mean()) * n_p
     return loss
 
+def update_schedule_pos_weight(pos_weight, pos_weight_inf, annihilation_speed):
+    pos_weight = (pos_weight - pos_weight_inf) * (1. - annihilation_speed) + pos_weight_inf
+    print('pos_weight: ')
+    print(pos_weight.item())
+    return pos_weight
+
 class PeakNetBCE1ChannelLoss(nn.Module):
 
-    def __init__(self, pos_weight=1.0, device=None, use_indexed_peaks=False, gamma=1., use_focal_loss=False, gamma_FL=2.):
+    def __init__(self, params):
         super(PeakNetBCE1ChannelLoss, self).__init__()
+        pos_weight = params["pos_weight"]
+        device = params["device"]
+        use_indexed_peaks = params["use_indexed_peaks"]
+        gamma = params["gamma"]
+        use_focal_loss = params["use_focal_loss"]
+        gamma_FL = params["gamma_FL"]
+        use_scheduled_pos_weight = params["use_scheduled_pos_weight"]
+        pos_weight_0 = params["pos_weight_0"]
+        annihilation_speed = params["annihilation_speed"]
         self.use_indexed_peaks = use_indexed_peaks
         if use_indexed_peaks:
             self.maxpool_idxg = nn.Sequential(nn.ReflectionPad2d(2),
@@ -74,6 +89,11 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             print('')
             print("Will use focal loss.")
             self.gamma_FL = torch.Tensor([gamma_FL])
+            self.use_scheduled_pos_weight = use_scheduled_pos_weight
+            if use_scheduled_pos_weight:
+                self.annihilation_speed = annihilation_speed
+                self.pos_weight = torch.Tensor([pos_weight_0])
+                self.pos_weight_inf = pos_weight
             if device is not None:
                 self.gamma_FL = self.gamma_FL.to(device)
         self.gamma_bool = False
@@ -98,10 +118,12 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             union_mask = peak_finding_mask + indexing_mask - intersection_mask # A OR B
             scores_filtered = scores[:, 0, :, :].reshape(-1)
             # scores_filtered[rejected_mask > 0.5] = -1e3 # predictions in A XOR B are artificially removed for the loss computation
-            scores_filtered = scores_filtered[rejected_mask < 0.5]
-            intersection_mask_filtered = intersection_mask[rejected_mask < 0.5]
+            scores_filtered = scores_filtered[rejected_mask < 0.5] # predictions in A XOR B are  removed for the loss computation
+            intersection_mask_filtered = intersection_mask[rejected_mask < 0.5] # targets in A XOR B are artificially removed for the loss computation
 
             if self.use_focal_loss:
+                if self.use_scheduled_pos_weight:
+                    self.pos_weight = update_schedule_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
                 loss = focal_loss(scores_filtered, intersection_mask_filtered, exclusion_mask, self.pos_weight, self.gamma_FL)
             else:
                 n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()

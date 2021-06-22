@@ -38,13 +38,8 @@ def train(model, device, params, writer):
     print('')
     print("Will show intermediate activation: ") + str(hasattr(model, 'can_show_inter_act') and model.can_show_inter_act) + "."
 
-    if params["n_classes"] == 3:
-        # outdated
-        loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"], device=device).to(device)
-    elif params["n_classes"] == 1:
-        loss_func = PeakNetBCE1ChannelLoss(pos_weight=params["pos_weight"], device=device,
-                                           use_indexed_peaks=params["use_indexed_peaks"], gamma=params["gamma"],
-                                           use_focal_loss=params["use_focal_loss"], gamma_FL=params["gamma_FL"]).to(device)
+    if params["n_classes"] == 1:
+        loss_func = PeakNetBCE1ChannelLoss(params).to(device)
     else:
         print("Unrecognized number of classes for loss function.")
         return
@@ -182,6 +177,9 @@ def parse_args():
     p.add_argument("--downsample", type=int, default=2)
     p.add_argument("--num_workers", type=int, default=0)
     p.add_argument("--use_adaptive_filtering", type=str, default="True")
+    p.add_argument("--use_scheduled_pos_weight", type=str, default="False")
+    p.add_argument("--pos_weight_0", type=float, default=1e4)
+    p.add_argument("--annihilation_speed", type=float, default=1e-2)
     return p.parse_args()
 
 def load_model(params):
@@ -246,6 +244,12 @@ def main():
         params["use_focal_loss"] = True
     else:
         params["use_focal_loss"] = False
+    if args.use_scheduled_pos_weight == "True":
+        params["use_scheduled_pos_weight"] = True
+        params["pos_weight_0"] = args.pos_weight_0
+        params["annihilation_speed"] = args.annihilation_speed
+    else:
+        params["use_scheduled_pos_weight"] = False
     params["verbose"] = False
 
     model = load_model(params)
