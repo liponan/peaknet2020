@@ -63,7 +63,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                                      nn.MaxPool2d(3, stride=1, padding=0))
         self.pos_weight = torch.Tensor([pos_weight])
         self.gamma_bool = False
-        if gamma != 1.:
+        if np.abs(gamma - 1.) > 1e-3:
             print('')
             print("Will geometrically scale the positive weight.")
             self.gamma_bool = True
