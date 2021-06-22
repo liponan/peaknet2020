@@ -94,8 +94,9 @@ class PeakNetBCE1ChannelLoss(nn.Module):
 
             if self.use_focal_loss:
                 n_p = 1 # different from BCE
-                loss = (self.pos_weight * n_p * intersection_mask * (1. - scores_filtered) ** self.gamma_FL * torch.log(scores_filtered) +
-                        (1. - intersection_mask) * scores_filtered ** self.gamma_FL * torch.log(1. - scores_filtered)).sum()
+                scores_sigmoid = nn.Sigmoid()(scores_filtered)
+                loss = (self.pos_weight * n_p * intersection_mask * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid) +
+                        (1. - intersection_mask) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).sum()
             else:
                 n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()
                 if self.gamma_bool:
@@ -133,8 +134,9 @@ class PeakNetBCE1ChannelLoss(nn.Module):
 
             if self.use_focal_loss:
                 n_p = 1 # different from BCE
-                loss = (self.pos_weight * n_p * targets_c * (1. - scores_c) ** self.gamma_FL * torch.log(scores_c) +
-                        (1. - targets_c) * scores_c ** self.gamma_FL * torch.log(1. - scores_c)).sum()
+                scores_sigmoid = nn.Sigmoid()(scores_c)
+                loss = (self.pos_weight * n_p * targets_c * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid) +
+                        (1. - targets_c) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).sum()
             else:
                 n_p = (~gt_mask).sum().double() / gt_mask.sum().double() # negative over positive
                 if self.gamma_bool:
