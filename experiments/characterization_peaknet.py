@@ -7,9 +7,9 @@ index_experiment = 1
 
 # Experiment #1: peaknet and unet vs pos_weight
 if index_experiment == 1:
-    pos_weight_list = [1, 1e-1, 1e-2]
+    pos_weight_list = [1e-3, 1e-4]
 
-    offset_idx = 0
+    offset_idx = 3
     prefix = "pos_weight_peaknet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
@@ -21,7 +21,8 @@ if index_experiment == 1:
                   ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
                   ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
-    offset_idx = 0
+    pos_weight_list = [1e-2, 1e-3, 1e-4]
+    offset_idx = 2
     prefix = "pos_weight_unet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")

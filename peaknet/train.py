@@ -42,7 +42,8 @@ def train(model, device, params, writer):
         # outdated
         loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"], device=device).to(device)
     elif params["n_classes"] == 1:
-        loss_func = PeakNetBCE1ChannelLoss(pos_weight=params["pos_weight"], device=device, use_indexed_peaks=params["use_indexed_peaks"]).to(device)
+        loss_func = PeakNetBCE1ChannelLoss(pos_weight=params["pos_weight"], device=device,
+                                           use_indexed_peaks=params["use_indexed_peaks"], gamma=params["gamma"]).to(device)
     else:
         print("Unrecognized number of classes for loss function.")
         return
@@ -61,9 +62,9 @@ def train(model, device, params, writer):
                                   use_indexed_peaks=params["use_indexed_peaks"],
                                   n_classes = params["n_classes"])
     idx_event_visualization = len(psana_images_vis) // 2
+    print('')
     print('Loading image for visualization...')
     img_vis, target_vis, _ = psana_images_vis[idx_event_visualization]
-    print('')
     print("nPeaks visualization: " + str(len(np.nonzero(target_vis[:, 0, :, :]))))
     if params["use_indexed_peaks"]:
         print("nIndexedPeaks visualization: " + str(len(np.nonzero(target_vis[:, 1, :, :]))))
@@ -127,7 +128,7 @@ def train(model, device, params, writer):
                                 print_str += key + " " + str(value) + " ; "
                         print(print_str)
                     if seen % params["upload_every"] == 0:
-                        saver.upload(metrics)
+                        saver.upload(metrics, params["save_name"])
                     if seen % (params["backup_every"]) == 0:
                         torch.save(model.state_dict(), "debug/"+params["experiment_name"]+"/model.pt")
                     if seen % params["show_image_every"] == 0:
@@ -159,6 +160,7 @@ def parse_args():
     p.add_argument("--lr", type=float, default=1e-2)
     p.add_argument("--weight_decay", type=float, default=0.)
     p.add_argument("--pos_weight", type=float, default=1e-1)
+    p.add_argument("--gamma", type=float, default=1.)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--n_per_run", type=int, default=-1)
@@ -213,6 +215,7 @@ def main():
     params["lr"] = args.lr
     params["weight_decay"] = args.weight_decay
     params["pos_weight"] = args.pos_weight
+    params["gamma"] = args.gamma
     params["cutoff"] = args.cutoff
     params["n_experiments"] = args.n_experiments
     params["n_per_run"] = args.n_per_run

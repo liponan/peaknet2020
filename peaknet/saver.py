@@ -13,7 +13,7 @@ class Saver():
         elif saver_type is None:
             print("Data will not be saved in saved_outputs directory.")
 
-    def upload(self, metrics):
+    def upload(self, metrics, save_name):
         if self.saver_type == "precision_recall":
             self.content["precision"].append(float(metrics["precision"]))
             self.content["recall"].append(float(metrics["recall"]))
@@ -21,6 +21,7 @@ class Saver():
         elif self.saver_type == "precision_recall_evaluation":
             self.content["precision"].append(float(metrics["precision"]))
             self.content["recall"].append(float(metrics["recall"]))
+        self.save(save_name)
 
     def save(self, save_name):
         if self.saver_type is not None:
