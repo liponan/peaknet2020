@@ -52,7 +52,7 @@ class PeaknetBCELoss(nn.Module):
 
 class PeakNetBCE1ChannelLoss(nn.Module):
 
-    def __init__(self, pos_weight=1.0, device=None, use_indexed_peaks=False, gamma=1.):
+    def __init__(self, pos_weight=1.0, device=None, use_indexed_peaks=False, gamma=1., use_focal_loss=False, gamma_FL=2.):
         super(PeakNetBCE1ChannelLoss, self).__init__()
         self.use_indexed_peaks = use_indexed_peaks
         if use_indexed_peaks:
@@ -62,8 +62,10 @@ class PeakNetBCE1ChannelLoss(nn.Module):
         self.maxpool = nn.Sequential(nn.ReflectionPad2d(1),
                                      nn.MaxPool2d(3, stride=1, padding=0))
         self.pos_weight = torch.Tensor([pos_weight])
+        self.use_focal_loss = use_focal_loss
+        self.gamma_FL = torch.Tensor([gamma_FL])
         self.gamma_bool = False
-        if np.abs(gamma - 1.) > 1e-3:
+        if not use_focal_loss and np.abs(gamma - 1.) > 1e-3:
             print('')
             print("Will geometrically scale the positive weight.")
             self.gamma_bool = True
@@ -85,12 +87,17 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             scores_filtered = scores[:, 0, :, :].reshape(-1)
             scores_filtered[rejected_mask > 0.5] = -1e3 # predictions in A XOR B are artificially removed for the loss computation
 
-            n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()
-            if self.gamma_bool:
-                n_p = n_p ** self.gamma
-            pos_weight = self.pos_weight * n_p
-            self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-            loss = self.bceloss(scores_filtered, intersection_mask) / self.pos_weight
+            if self.use_focal_loss:
+                n_p = 1 # different from BCE
+                loss = (self.pos_weight * n_p * intersection_mask * (1. - scores_filtered) ** self.gamma_FL * torch.log(scores_filtered) +
+                        (1. - intersection_mask) * scores_filtered ** self.gamma_FL * torch.log(1. - scores_filtered)).sum()
+            else:
+                n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()
+                if self.gamma_bool:
+                    n_p = n_p ** self.gamma
+                pos_weight = self.pos_weight * n_p
+                self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+                loss = self.bceloss(scores_filtered, intersection_mask) / self.pos_weight
 
             with torch.no_grad():
                 n_pos_gt = intersection_mask.sum()
@@ -119,12 +126,17 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             targets_c = targets[:, 0, :, :].reshape(-1)
             gt_mask = targets_c > 0.5
 
-            n_p = (~gt_mask).sum().double() / gt_mask.sum().double() # negative over positive
-            if self.gamma_bool:
-                n_p = n_p ** self.gamma
-            pos_weight = self.pos_weight * n_p
-            self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-            loss = self.bceloss(scores_c, targets_c) / self.pos_weight # the sigmoid is integrated to bceloss
+            if self.use_focal_loss:
+                n_p = 1 # different from BCE
+                loss = (self.pos_weight * n_p * targets_c * (1. - scores_c) ** self.gamma_FL * torch.log(scores_c) +
+                        (1. - targets_c) * scores_c ** self.gamma_FL * torch.log(1. - scores_c)).sum()
+            else:
+                n_p = (~gt_mask).sum().double() / gt_mask.sum().double() # negative over positive
+                if self.gamma_bool:
+                    n_p = n_p ** self.gamma
+                pos_weight = self.pos_weight * n_p
+                self.bceloss = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+                loss = self.bceloss(scores_c, targets_c) / self.pos_weight # the sigmoid is integrated to bceloss
 
             with torch.no_grad():
                 n_gt = targets_c.sum()

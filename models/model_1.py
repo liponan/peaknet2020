@@ -20,7 +20,7 @@ class AdaFilter_1(nn.Module):
         k_list = [3, 3]
         n_list = [16]
         NL = nn.LeakyReLU()
-        self.adaptive_filtering = True
+        self.adaptive_filtering = params["use_adaptive_filtering"]
         self.adaptive_residual = False # keep False because each panel should be scaled differently
         #
         if not self.adaptive_filtering:

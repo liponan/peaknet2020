@@ -43,7 +43,8 @@ def train(model, device, params, writer):
         loss_func = PeaknetBCELoss(coor_scale=params["coor_scale"], pos_weight=params["pos_weight"], device=device).to(device)
     elif params["n_classes"] == 1:
         loss_func = PeakNetBCE1ChannelLoss(pos_weight=params["pos_weight"], device=device,
-                                           use_indexed_peaks=params["use_indexed_peaks"], gamma=params["gamma"]).to(device)
+                                           use_indexed_peaks=params["use_indexed_peaks"], gamma=params["gamma"],
+                                           use_focal_loss=params["use_focal_loss"], gamma_FL=params["gamma_FL"]).to(device)
     else:
         print("Unrecognized number of classes for loss function.")
         return
@@ -161,6 +162,8 @@ def parse_args():
     p.add_argument("--weight_decay", type=float, default=0.)
     p.add_argument("--pos_weight", type=float, default=1e-1)
     p.add_argument("--gamma", type=float, default=1.)
+    p.add_argument("--use_focal_loss", type=str, default="False")
+    p.add_argument("--gamma_FL", type=float, default=2.)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--n_per_run", type=int, default=-1)
@@ -178,6 +181,7 @@ def parse_args():
     p.add_argument("--use_indexed_peaks", type=str, default="True")
     p.add_argument("--downsample", type=int, default=2)
     p.add_argument("--num_workers", type=int, default=0)
+    p.add_argument("--use_adaptive_filtering", type=str, default="True")
     return p.parse_args()
 
 def load_model(params):
@@ -216,6 +220,7 @@ def main():
     params["weight_decay"] = args.weight_decay
     params["pos_weight"] = args.pos_weight
     params["gamma"] = args.gamma
+    params["gamma_FL"] = args.gamma_FL
     params["cutoff"] = args.cutoff
     params["n_experiments"] = args.n_experiments
     params["n_per_run"] = args.n_per_run
@@ -233,6 +238,14 @@ def main():
         params["use_indexed_peaks"] = True
     else:
         params["use_indexed_peaks"] = False
+    if args.use_adaptive_filtering == "True":
+        params["use_adaptive_filtering"] = True
+    else:
+        params["use_adaptive_filtering"] = False
+    if args.use_focal_loss == "True":
+        params["use_focal_loss"] = True
+    else:
+        params["use_focal_loss"] = False
     params["verbose"] = False
 
     model = load_model(params)
