@@ -50,6 +50,13 @@ class PeaknetBCELoss(nn.Module):
                    "precision": precision, "rmsd": rmsd}
         return metrics
 
+def focal_loss(scores, target, TN, alpha, gamma):
+    n_p = TN.sum().double() / target.sum().double() # different from BCE
+    scores_sigmoid = torch.clamp(nn.Sigmoid()(scores), min=1e-3, max=1. - 1e-3)
+    loss = -(alpha * (target * (1. - scores_sigmoid) ** gamma * torch.log(scores_sigmoid)).mean() +
+             ((1. - target) * scores_sigmoid ** gamma * torch.log(1. - scores_sigmoid)).mean()) * n_p
+    return loss
+
 class PeakNetBCE1ChannelLoss(nn.Module):
 
     def __init__(self, pos_weight=1.0, device=None, use_indexed_peaks=False, gamma=1., use_focal_loss=False, gamma_FL=2.):
@@ -95,14 +102,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             intersection_mask_filtered = intersection_mask[rejected_mask < 0.5]
 
             if self.use_focal_loss:
-                n_p = exclusion_mask.sum().double() / intersection_mask.sum().double() # different from BCE
-                scores_sigmoid = torch.clamp(nn.Sigmoid()(scores_filtered), min=1e-3, max=1.-1e-3)
-                print('P')
-                print((intersection_mask_filtered * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid)).mean().item())
-                print('N')
-                print(((1. - intersection_mask_filtered) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).mean().item())
-                loss = -(self.pos_weight * (intersection_mask_filtered * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid)).mean() +
-                         ((1. - intersection_mask_filtered) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).mean()) * n_p
+                loss = focal_loss(scores_filtered, intersection_mask_filtered, exclusion_mask, self.pos_weight, self.gamma_FL)
             else:
                 n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()
                 if self.gamma_bool:
@@ -139,10 +139,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             gt_mask = targets_c > 0.5
 
             if self.use_focal_loss:
-                n_p = 1 # different from BCE
-                scores_sigmoid = nn.Sigmoid()(scores_c)
-                loss = (self.pos_weight * n_p * targets_c * (1. - scores_sigmoid) ** self.gamma_FL * torch.log(scores_sigmoid) +
-                        (1. - targets_c) * scores_sigmoid ** self.gamma_FL * torch.log(1. - scores_sigmoid)).sum()
+                loss = focal_loss(scores_c, targets_c, ~gt_mask, self.pos_weight, self.gamma_FL)
             else:
                 n_p = (~gt_mask).sum().double() / gt_mask.sum().double() # negative over positive
                 if self.gamma_bool:
