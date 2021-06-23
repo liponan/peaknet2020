@@ -3,7 +3,7 @@ import os
 
 os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
-index_experiment = 6 # 3, 7
+index_experiment = 6 # 1, 3, 7
 
 print("Index Experiment: " + str(index_experiment))
 
@@ -100,8 +100,8 @@ if index_experiment == 5:
 
 # Experiment #6: BCE vs FL on UNet without indexing
 if index_experiment == 6:
-    pos_weight_list = np.logspace(-1, 0, 3)
-    offset_idx = 3
+    pos_weight_list = np.logspace(0, 2, 3)
+    offset_idx = 0
     prefix = "pos_weight_FL_unet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")

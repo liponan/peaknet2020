@@ -167,6 +167,9 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             gt_mask = targets_c > 0.5
 
             if self.use_focal_loss:
+                if self.use_scheduled_pos_weight:
+                    #self.pos_weight = update_geo_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
+                    update_step_pos_weight(self, self.pos_weight_inf)
                 loss = focal_loss(scores_c, targets_c, ~gt_mask, self.pos_weight, self.gamma_FL)
             else:
                 n_p = (~gt_mask).sum().double() / gt_mask.sum().double() # negative over positive
