@@ -3,7 +3,7 @@ import os
 
 os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
-index_experiment = 6 # 5, 6, 7
+index_experiment = 1 # , 7
 
 print("Index Experiment: " + str(index_experiment))
 
