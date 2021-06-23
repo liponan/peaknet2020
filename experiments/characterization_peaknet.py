@@ -3,7 +3,7 @@ import os
 
 os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
-index_experiment = 1 # , 7
+index_experiment = 6 # 3, 7
 
 print("Index Experiment: " + str(index_experiment))
 
@@ -53,8 +53,8 @@ if index_experiment == 2:
 
 # Experiment #3: influence of indexing on PeakNet 2.0
 if index_experiment == 3:
-    pos_weight_list = [1, 1e-1, 1e-2, 1e-3, 1e-4]
-    offset_idx = 0
+    pos_weight_list = [1e-4]
+    offset_idx = 4
     prefix = "pos_weight_no_idxg_peaknet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
@@ -63,7 +63,7 @@ if index_experiment == 3:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params_model_1.json --saver_type "precision_recall"'
-                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
+                  ' --n_experiments -1 --n_per_run -1 --n_epochs 2 --show_image_every 10000'
                   ' --use_indexed_peaks False --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
 # Experiment #4: influence of adaptive filtering on PeakNet 2.0
@@ -100,8 +100,8 @@ if index_experiment == 5:
 
 # Experiment #6: BCE vs FL on UNet without indexing
 if index_experiment == 6:
-    pos_weight_list = np.logspace(0.5, 2, 4)
-    offset_idx = 0
+    pos_weight_list = np.logspace(-1, 0, 3)
+    offset_idx = 3
     prefix = "pos_weight_FL_unet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
