@@ -38,7 +38,7 @@ if index_experiment == 1:
 
 # Experiment #2: influence of indexing on unet
 if index_experiment == 2:
-    pos_weight_list = [1e-5]
+    pos_weight_list = [5e-5]
     offset_idx = 5
     prefix = "pos_weight_no_idxg_unet_"
     for i, pw in enumerate(pos_weight_list):
@@ -48,7 +48,7 @@ if index_experiment == 2:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
-                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
+                  ' --n_experiments -1 --n_per_run -1 --n_epochs 2 --show_image_every 10000'
                   ' --use_indexed_peaks False --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
 # Experiment #3: influence of indexing on PeakNet 2.0
