@@ -158,7 +158,7 @@ def parse_args():
     p.add_argument("--pos_weight", type=float, default=1e-1)
     p.add_argument("--gamma", type=float, default=1.)
     p.add_argument("--use_focal_loss", type=str, default="False")
-    p.add_argument("--gamma_FL", type=float, default=1.)
+    p.add_argument("--gamma_FL", type=float, default=2.)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--n_per_run", type=int, default=-1)
@@ -178,8 +178,8 @@ def parse_args():
     p.add_argument("--num_workers", type=int, default=0)
     p.add_argument("--use_adaptive_filtering", type=str, default="True")
     p.add_argument("--use_scheduled_pos_weight", type=str, default="False")
-    p.add_argument("--pos_weight_0", type=float, default=1e4)
-    p.add_argument("--annihilation_speed", type=float, default=5e-2)
+    p.add_argument("--pos_weight_0", type=float, default=1e3)
+    p.add_argument("--annihilation_speed", type=float, default=1e-1)
     return p.parse_args()
 
 def load_model(params):

@@ -84,8 +84,8 @@ if index_experiment == 4:
 
 # Experiment #5: BCE vs FL on PeakNet with indexing and AF
 if index_experiment == 5:
-    pos_weight_list = [1e1]
-    offset_idx = 2
+    pos_weight_list = np.logspace(1.5, 3, 4)
+    offset_idx = 0
     prefix = "pos_weight_FL_peaknet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
@@ -96,4 +96,4 @@ if index_experiment == 5:
         os.system('python train.py params_model_1.json --saver_type "precision_recall"'
                   ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
                   ' --use_indexed_peaks True --use_adaptive_filtering True --use_focal_loss True'
-                  ' --use_scheduled_pos_weight True --lr 0.0001 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
+                  ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
