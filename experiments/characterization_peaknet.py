@@ -84,8 +84,8 @@ if index_experiment == 4:
 
 # Experiment #5: BCE vs FL on PeakNet with indexing and AF
 if index_experiment == 5:
-    pos_weight_list = np.logspace(1.5, 2, 2)
-    offset_idx = 2
+    pos_weight_list = np.logspace(-0.5, 0, 2)
+    offset_idx = 4
     prefix = "pos_weight_FL_peaknet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
@@ -97,3 +97,52 @@ if index_experiment == 5:
                   ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
                   ' --use_indexed_peaks True --use_adaptive_filtering True --use_focal_loss True'
                   ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
+
+# Experiment #6: BCE vs FL on UNet without indexing
+if index_experiment == 6:
+    pos_weight_list = np.logspace(0.5, 2, 4)
+    offset_idx = 0
+    prefix = "pos_weight_FL_unet_"
+    for i, pw in enumerate(pos_weight_list):
+        print("---")
+        print("Experiment #" + str(i + 1))
+        print("pos_weight: " + str(pw))
+        print("---")
+        save_name = prefix + str(offset_idx + i)
+        os.system('python train.py params.json --saver_type "precision_recall"'
+                  ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
+                  ' --use_indexed_peaks False --use_focal_loss True'
+                  ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
+
+# Experiment #7: dowsampling 1 on PeakNet with indexing, AF and FL and UNet without indexing and FL (or BCE?)
+if index_experiment == 7:
+    pos_weight_list = np.logspace(0.5, 2, 4)
+    offset_idx = 0
+    prefix = "pos_weight_ds1_peaknet_"
+    for i, pw in enumerate(pos_weight_list):
+        print("---")
+        print("Experiment #" + str(i + 1))
+        print("pos_weight: " + str(pw))
+        print("---")
+        save_name = prefix + str(offset_idx + i)
+        os.system('python train.py params_model_1.json --saver_type "precision_recall"'
+                  ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
+                  ' --use_indexed_peaks True --use_adaptive_filtering True --downsample 1'
+                  ' --use_focal_loss True'
+                  ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
+
+    pos_weight_list = np.logspace(0.5, 2, 4)
+    offset_idx = 0
+    prefix = "pos_weight_ds1_unet_"
+    for i, pw in enumerate(pos_weight_list):
+        print("---")
+        print("Experiment #" + str(i + 1))
+        print("pos_weight: " + str(pw))
+        print("---")
+        save_name = prefix + str(offset_idx + i)
+        os.system('python train.py params.json --saver_type "precision_recall"'
+                  ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
+                  ' --use_indexed_peaks False --downsample 1'
+                  ' --use_focal_loss True'
+                  ' --use_scheduled_pos_weight True --lr 0.01'
+                  ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
