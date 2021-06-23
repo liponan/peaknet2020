@@ -178,7 +178,7 @@ def parse_args():
     p.add_argument("--num_workers", type=int, default=0)
     p.add_argument("--use_adaptive_filtering", type=str, default="True")
     p.add_argument("--use_scheduled_pos_weight", type=str, default="False")
-    p.add_argument("--pos_weight_0", type=float, default=1e3)
+    p.add_argument("--pos_weight_0", type=float, default=1e2)
     p.add_argument("--annihilation_speed", type=float, default=1e-1)
     return p.parse_args()
 

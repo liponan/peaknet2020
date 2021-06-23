@@ -62,7 +62,7 @@ def update_geo_pos_weight(pos_weight, pos_weight_inf, annihilation_speed):
     print('pos_weight: ' + str(pos_weight.item()))
     return pos_weight
 
-def update_step_pos_weight(loss, pos_weight_inf, step_after=20):
+def update_step_pos_weight(loss, pos_weight_inf, step_after=100):
     if loss.internal_count == step_after:
         print('step')
         loss.pos_weight[0] = pos_weight_inf
