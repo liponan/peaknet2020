@@ -84,7 +84,7 @@ if index_experiment == 4:
 
 # Experiment #5: BCE vs FL on PeakNet with indexing and AF
 if index_experiment == 5:
-    pos_weight_list = np.logspace(-0.5, 0, 2)
+    pos_weight_list = np.logspace(-0.5, -0.5, 1)
     offset_idx = 4
     prefix = "pos_weight_FL_peaknet_"
     for i, pw in enumerate(pos_weight_list):
