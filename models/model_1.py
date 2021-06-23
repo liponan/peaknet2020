@@ -61,8 +61,7 @@ class AdaFilter_1(nn.Module):
         self.gen_peak_finding = nn.Sequential(*layers)
         if self.residual:
             self.combination_layer = nn.Conv2d(2, 1, 1)
-            print(self.state_dict()['combination_layer.bias'])
-            print(self.state_dict()['combination_layer.bias'].shape)
+            self.state_dict()['combination_layer.bias'][0] = -2.
 
         # Panel-Dependent Scaling
         k_list = []
