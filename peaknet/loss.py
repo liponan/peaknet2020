@@ -57,10 +57,15 @@ def focal_loss(scores, target, TN, alpha, gamma):
              ((1. - target) * scores_sigmoid ** gamma * torch.log(1. - scores_sigmoid)).mean()) * n_p
     return loss
 
-def update_schedule_pos_weight(pos_weight, pos_weight_inf, annihilation_speed):
+def update_geo_pos_weight(pos_weight, pos_weight_inf, annihilation_speed):
     pos_weight = (pos_weight - pos_weight_inf) * (1. - annihilation_speed) + pos_weight_inf
     print('pos_weight: ' + str(pos_weight.item()))
     return pos_weight
+
+def update_step_pos_weight(loss, pos_weight_inf, step_after=2):
+    if loss.internal_count >= step_after:
+        loss.pos_weight[0] = pos_weight_inf
+    loss.internal_count += 1
 
 class PeakNetBCE1ChannelLoss(nn.Module):
 
@@ -92,6 +97,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                 self.annihilation_speed = annihilation_speed
                 self.pos_weight = torch.Tensor([pos_weight_0])
                 self.pos_weight_inf = pos_weight
+                self.internal_count = 0
             if device is not None:
                 self.gamma_FL = self.gamma_FL.to(device)
         self.gamma_bool = False
@@ -121,7 +127,8 @@ class PeakNetBCE1ChannelLoss(nn.Module):
 
             if self.use_focal_loss:
                 if self.use_scheduled_pos_weight:
-                    self.pos_weight = update_schedule_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
+                    self.pos_weight = update_geo_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
+                    update_step_pos_weight(self, self.pos_weight)
                 loss = focal_loss(scores_filtered, intersection_mask_filtered, exclusion_mask, self.pos_weight, self.gamma_FL)
             else:
                 n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()
