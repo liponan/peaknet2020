@@ -63,11 +63,9 @@ def update_geo_pos_weight(pos_weight, pos_weight_inf, annihilation_speed):
     return pos_weight
 
 def update_step_pos_weight(loss, pos_weight_inf, step_after=200):
-    print('update '+ str(loss.internal_count))
     if loss.internal_count == step_after:
         print('step')
         loss.pos_weight[0] = pos_weight_inf
-        print('pos_weight: '+str(loss.pos_weight))
     loss.internal_count += 1
 
 class PeakNetBCE1ChannelLoss(nn.Module):
