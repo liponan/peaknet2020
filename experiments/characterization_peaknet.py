@@ -3,13 +3,13 @@ import os
 
 os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
-index_experiment = 2 # 2, 6, 7
+index_experiment = 1 # 5, 6, 7
 
 print("Index Experiment: " + str(index_experiment))
 
 # Experiment #1: peaknet and unet vs pos_weight
 if index_experiment == 1:
-    pos_weight_list = [1e-3, 1e-4]
+    pos_weight_list = []
 
     offset_idx = 3
     prefix = "pos_weight_peaknet_"
@@ -23,8 +23,8 @@ if index_experiment == 1:
                   ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
                   ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
-    pos_weight_list = [1e-2, 1e-3, 1e-4]
-    offset_idx = 2
+    pos_weight_list = [1e-4]
+    offset_idx = 4
     prefix = "pos_weight_unet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
@@ -33,7 +33,7 @@ if index_experiment == 1:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
-                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
+                  ' --n_experiments -1 --n_per_run -1 --n_epochs 2 --show_image_every 10000'
                   ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
 # Experiment #2: influence of indexing on unet
@@ -84,8 +84,8 @@ if index_experiment == 4:
 
 # Experiment #5: BCE vs FL on PeakNet with indexing and AF
 if index_experiment == 5:
-    pos_weight_list = [1e2]
-    offset_idx = 3
+    pos_weight_list = [1]
+    offset_idx = 5
     prefix = "pos_weight_FL_peaknet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
