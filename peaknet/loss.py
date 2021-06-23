@@ -129,7 +129,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             if self.use_focal_loss:
                 if self.use_scheduled_pos_weight:
                     #self.pos_weight = update_geo_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
-                    update_step_pos_weight(self, self.pos_weight)
+                    update_step_pos_weight(self, self.pos_weight_inf)
                     print(self.pos_weight)
                 loss = focal_loss(scores_filtered, intersection_mask_filtered, exclusion_mask, self.pos_weight, self.gamma_FL)
             else:
