@@ -158,7 +158,7 @@ def parse_args():
     p.add_argument("--pos_weight", type=float, default=1e-1)
     p.add_argument("--gamma", type=float, default=1.)
     p.add_argument("--use_focal_loss", type=str, default="False")
-    p.add_argument("--gamma_FL", type=float, default=2.)
+    p.add_argument("--gamma_FL", type=float, default=1.)
     p.add_argument("--cutoff", type=float, default=0.5)
     p.add_argument("--n_experiments", type=int, default=-1)
     p.add_argument("--n_per_run", type=int, default=-1)
