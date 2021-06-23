@@ -59,8 +59,7 @@ def focal_loss(scores, target, TN, alpha, gamma):
 
 def update_schedule_pos_weight(pos_weight, pos_weight_inf, annihilation_speed):
     pos_weight = (pos_weight - pos_weight_inf) * (1. - annihilation_speed) + pos_weight_inf
-    print('pos_weight: ')
-    print(pos_weight.item())
+    print('pos_weight: ' + str(pos_weight.item()))
     return pos_weight
 
 class PeakNetBCE1ChannelLoss(nn.Module):
