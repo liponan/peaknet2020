@@ -3,7 +3,7 @@ import os
 
 os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
-index_experiment = 5
+index_experiment = 5 # 2, 6, 7
 
 print("Index Experiment: " + str(index_experiment))
 
@@ -38,8 +38,8 @@ if index_experiment == 1:
 
 # Experiment #2: influence of indexing on unet
 if index_experiment == 2:
-    pos_weight_list = [1, 1e-1, 1e-2, 1e-3, 1e-4]
-    offset_idx = 0
+    pos_weight_list = [1e-5]
+    offset_idx = 5
     prefix = "pos_weight_no_idxg_unet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
@@ -84,8 +84,8 @@ if index_experiment == 4:
 
 # Experiment #5: BCE vs FL on PeakNet with indexing and AF
 if index_experiment == 5:
-    pos_weight_list = [1]
-    offset_idx = 5
+    pos_weight_list = [1e2]
+    offset_idx = 3
     prefix = "pos_weight_FL_peaknet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
