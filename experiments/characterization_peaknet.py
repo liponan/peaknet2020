@@ -33,7 +33,7 @@ if index_experiment == 1:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
-                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --use_scheduled_loss_pos_weight True'
+                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --use_scheduled_pos_weight True'
                   ' --show_image_every 10000'
                   ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
@@ -49,7 +49,7 @@ if index_experiment == 2:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
-                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --use_scheduled_loss_pos_weight True'
+                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --use_scheduled_pos_weight True'
                   ' --show_image_every 10000'
                   ' --use_indexed_peaks False --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
@@ -65,7 +65,7 @@ if index_experiment == 3:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params_model_1.json --saver_type "precision_recall"'
-                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --use_scheduled_loss_pos_weight True'
+                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --use_scheduled_pos_weight True'
                   ' --show_image_every 10000'
                   ' --use_indexed_peaks False --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
