@@ -80,7 +80,7 @@ class AdaFilter_1(nn.Module):
     def create_panel_to_filter_encoder(self, k_list, n_list, h, w):
         # h = 185 ~ 4 * 8 * 5, w = 388 ~ 8 * 8 * 6
         # k ** 2 = 9 -> 3, 6, 9 + 1 (bias) = 10
-        NL = nn.ReLU()
+        NL = nn.LeakyReLU()
         k = 3
         n_layers = 3
         n_features = 8

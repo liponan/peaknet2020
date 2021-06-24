@@ -98,7 +98,7 @@ if index_experiment == 5:
                   ' --use_indexed_peaks True --use_adaptive_filtering True --use_focal_loss True'
                   ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
-# Experiment #6: BCE vs FL on UNet without indexing
+# Experiment #6: BCE vs FL on UNet with indexing
 if index_experiment == 6:
     pos_weight_list = np.logspace(0, 2, 3)
     offset_idx = 0
@@ -111,7 +111,7 @@ if index_experiment == 6:
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
                   ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
-                  ' --use_indexed_peaks False --use_focal_loss True'
+                  ' --use_indexed_peaks True --use_focal_loss True'
                   ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
 # Experiment #7: dowsampling 1 on PeakNet with indexing, AF and FL and UNet without indexing and FL (or BCE?)
