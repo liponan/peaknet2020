@@ -89,17 +89,17 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                                      nn.MaxPool2d(3, stride=1, padding=0))
         self.pos_weight = torch.Tensor([pos_weight])
         self.use_focal_loss = use_focal_loss
+        self.use_scheduled_pos_weight = use_scheduled_pos_weight
+        if use_scheduled_pos_weight:
+            self.annihilation_speed = annihilation_speed
+            self.pos_weight = torch.Tensor([pos_weight_0])
+            self.pos_weight_inf = pos_weight
+            self.internal_count = 0
+            self.step_after = params["step_after"]
         if use_focal_loss:
             print('')
             print("Will use focal loss.")
             self.gamma_FL = torch.Tensor([gamma_FL])
-            self.use_scheduled_pos_weight = use_scheduled_pos_weight
-            if use_scheduled_pos_weight:
-                self.annihilation_speed = annihilation_speed
-                self.pos_weight = torch.Tensor([pos_weight_0])
-                self.pos_weight_inf = pos_weight
-                self.internal_count = 0
-                self.step_after = params["step_after"]
             if device is not None:
                 self.gamma_FL = self.gamma_FL.to(device)
         self.gamma_bool = False
