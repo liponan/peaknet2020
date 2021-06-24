@@ -127,10 +127,10 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             scores_filtered = scores_filtered[rejected_mask < 0.5] # predictions in A XOR B are  removed for the loss computation
             intersection_mask_filtered = intersection_mask[rejected_mask < 0.5] # targets in A XOR B are artificially removed for the loss computation
 
+            if self.use_scheduled_pos_weight:
+                # self.pos_weight = update_geo_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
+                update_step_pos_weight(self, self.pos_weight_inf)
             if self.use_focal_loss:
-                if self.use_scheduled_pos_weight:
-                    #self.pos_weight = update_geo_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
-                    update_step_pos_weight(self, self.pos_weight_inf)
                 loss = focal_loss(scores_filtered, intersection_mask_filtered, exclusion_mask, self.pos_weight, self.gamma_FL)
             else:
                 n_p = exclusion_mask.sum().double() / intersection_mask.sum().double()
@@ -167,10 +167,10 @@ class PeakNetBCE1ChannelLoss(nn.Module):
             targets_c = targets[:, 0, :, :].reshape(-1)
             gt_mask = targets_c > 0.5
 
+            if self.use_scheduled_pos_weight:
+                # self.pos_weight = update_geo_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
+                update_step_pos_weight(self, self.pos_weight_inf)
             if self.use_focal_loss:
-                if self.use_scheduled_pos_weight:
-                    #self.pos_weight = update_geo_pos_weight(self.pos_weight, self.pos_weight_inf, self.annihilation_speed)
-                    update_step_pos_weight(self, self.pos_weight_inf)
                 loss = focal_loss(scores_c, targets_c, ~gt_mask, self.pos_weight, self.gamma_FL)
             else:
                 n_p = (~gt_mask).sum().double() / gt_mask.sum().double() # negative over positive

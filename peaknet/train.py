@@ -250,6 +250,11 @@ def main():
         params["use_focal_loss"] = False
     if args.use_scheduled_pos_weight == "True":
         params["use_scheduled_pos_weight"] = True
+        params["step_after"] = 2000 / params["batch_size"] # hard encoded
+        if params["use_focal_loss"]:
+            params["pos_weight_0"] = 100 # hard encoded
+        else:
+            params["pos_weight_0"] = 1 # hard encoded
     else:
         params["use_scheduled_pos_weight"] = False
     params["verbose"] = False
