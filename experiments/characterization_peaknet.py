@@ -20,11 +20,11 @@ if index_experiment == 1:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params_model_1.json --saver_type "precision_recall"'
-                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
+                  ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
                   ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
-    pos_weight_list = [3e-3, 1e-4, 1e-5]
-    offset_idx = 4
+    pos_weight_list = [1e-3]
+    offset_idx = 3
     prefix = "pos_weight_unet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
@@ -33,7 +33,7 @@ if index_experiment == 1:
         print("---")
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
-                  ' --n_experiments -1 --n_per_run -1 --n_epochs 1 --use_scheduled_pos_weight True'
+                  ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --use_scheduled_pos_weight True'
                   ' --show_image_every 10000'
                   ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
@@ -134,7 +134,7 @@ if index_experiment == 7:
                   ' --use_focal_loss True'
                   ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
-    pos_weight_list = np.logspace(0.5, 2, 4)
+    pos_weight_list = [1e-2, 1e-3, 1e-4]
     offset_idx = 0
     prefix = "pos_weight_ds1_unet_"
     for i, pw in enumerate(pos_weight_list):
@@ -145,7 +145,7 @@ if index_experiment == 7:
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
                   ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
-                  ' --use_indexed_peaks False --downsample 1'
-                  ' --use_focal_loss True'
+                  ' --use_indexed_peaks True --downsample 1'
+                  ' --use_focal_loss False'
                   ' --use_scheduled_pos_weight True --lr 0.01'
                   ' --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
