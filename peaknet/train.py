@@ -180,6 +180,7 @@ def parse_args():
     p.add_argument("--use_scheduled_pos_weight", type=str, default="False")
     p.add_argument("--pos_weight_0", type=float, default=1e2)
     p.add_argument("--annihilation_speed", type=float, default=1e-1)
+    p.add_argument("--step_after", type=int, default=200)
     return p.parse_args()
 
 def load_model(params):
@@ -234,6 +235,7 @@ def main():
     params["n_epochs"] = args.n_epochs
     params["pos_weight_0"] = args.pos_weight_0
     params["annihilation_speed"] = args.annihilation_speed
+    params["step_after"] = args.step_after
     if args.use_indexed_peaks == "True":
         params["use_indexed_peaks"] = True
     else:

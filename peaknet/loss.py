@@ -62,8 +62,8 @@ def update_geo_pos_weight(pos_weight, pos_weight_inf, annihilation_speed):
     print('pos_weight: ' + str(pos_weight.item()))
     return pos_weight
 
-def update_step_pos_weight(loss, pos_weight_inf, step_after=200):
-    if loss.internal_count == step_after:
+def update_step_pos_weight(loss, pos_weight_inf):
+    if loss.internal_count == loss.step_after:
         print('step')
         loss.pos_weight[0] = pos_weight_inf
     loss.internal_count += 1
@@ -99,6 +99,7 @@ class PeakNetBCE1ChannelLoss(nn.Module):
                 self.pos_weight = torch.Tensor([pos_weight_0])
                 self.pos_weight_inf = pos_weight
                 self.internal_count = 0
+                self.step_after = params["step_after"]
             if device is not None:
                 self.gamma_FL = self.gamma_FL.to(device)
         self.gamma_bool = False

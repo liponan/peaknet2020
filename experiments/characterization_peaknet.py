@@ -111,7 +111,7 @@ if index_experiment == 6:
         save_name = prefix + str(offset_idx + i)
         os.system('python train.py params.json --saver_type "precision_recall"'
                   ' --n_experiments 5 --n_per_run -1 --n_epochs 1 --show_image_every 10000'
-                  ' --use_indexed_peaks True --use_focal_loss True'
+                  ' --use_indexed_peaks True --use_focal_loss True --step_after 1000'
                   ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
 # Experiment #7: dowsampling 1 on PeakNet with indexing, AF and FL and UNet without indexing and FL (or BCE?)
