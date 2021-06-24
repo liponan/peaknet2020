@@ -120,7 +120,7 @@ if index_experiment == 6:
 # Experiment #7: dowsampling 1 on PeakNet with indexing, AF and FL and UNet without indexing and FL (or BCE?)
 if index_experiment == 7:
     # pos_weight_list = np.logspace(0.5, 2, 4)
-    pos_weight = []
+    pos_weight_list = []
     offset_idx = 0
     prefix = "pos_weight_ds1_peaknet_"
     for i, pw in enumerate(pos_weight_list):
