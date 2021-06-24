@@ -3,7 +3,7 @@ import os
 
 os.chdir("/cds/home/a/axlevy/peaknet2020/peaknet")
 
-index_experiment = 1 # 2, 3, 7
+index_experiment = 7 # 2, 3,
 
 print("Index Experiment: " + str(index_experiment))
 
@@ -119,7 +119,8 @@ if index_experiment == 6:
 
 # Experiment #7: dowsampling 1 on PeakNet with indexing, AF and FL and UNet without indexing and FL (or BCE?)
 if index_experiment == 7:
-    pos_weight_list = np.logspace(0.5, 2, 4)
+    # pos_weight_list = np.logspace(0.5, 2, 4)
+    pos_weight = []
     offset_idx = 0
     prefix = "pos_weight_ds1_peaknet_"
     for i, pw in enumerate(pos_weight_list):
@@ -134,7 +135,7 @@ if index_experiment == 7:
                   ' --use_focal_loss True'
                   ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
-    pos_weight_list = [1e-2, 1e-3, 1e-4]
+    pos_weight_list = [1e-3, 1e-4]
     offset_idx = 0
     prefix = "pos_weight_ds1_unet_"
     for i, pw in enumerate(pos_weight_list):
