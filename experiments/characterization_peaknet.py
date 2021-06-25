@@ -135,8 +135,8 @@ if index_experiment == 7:
                   ' --use_focal_loss True'
                   ' --use_scheduled_pos_weight True --lr 0.01 --save_name ' + str(save_name) + ' --pos_weight ' + str(pw))
 
-    pos_weight_list = [1e-3, 1e-4]
-    offset_idx = 0
+    pos_weight_list = [3e-5, 1e-5]
+    offset_idx = 2
     prefix = "pos_weight_ds1_unet_"
     for i, pw in enumerate(pos_weight_list):
         print("---")
