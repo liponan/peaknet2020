@@ -2,10 +2,11 @@ import torch
 from predict import extract
 from unet import UNet
 
+# Unused file
 
 class PeakNet(object):
 
-    def __init__(self, n_filters=32, model_path=None):
+    def __init__(self, n_filters=24, model_path=None):
         self.model = UNet(n_channels=1, n_classes=3, n_filters=n_filters)
         self.model_path = model_path
         self.n_filters = n_filters
@@ -24,7 +25,7 @@ class PeakNet(object):
         self.model.load_state_dict(torch.load(model_path, map_location="cpu"))
         self.model_path = model_path
 
-    def predict(self, data, conf_cutoff=0.1):
+    def predict(self, data, conf_cutoff=0.5):
         scores = self.model(data)
         output = extract(scores, conf_cutoff=conf_cutoff)
         return output

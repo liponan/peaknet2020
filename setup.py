@@ -18,7 +18,7 @@ def main():
           description="neural network for peak detection",
           packages=["peaknet", "unet"],
           package_dir={"peaknet": "peaknet", "unet:": "unet"},
-          install_requires=["numpy", "torch>=1.0", "h5py", "pandas"],
+          install_requires=["numpy", "torch>=1.0", "h5py", "pandas", "tensorboard"],
           scripts=[s for s in glob('scripts/*') if not s.endswith('__.py')]
           )
 
